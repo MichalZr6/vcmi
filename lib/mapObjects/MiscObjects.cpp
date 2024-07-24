@@ -490,7 +490,7 @@ void CGMonolith::onHeroVisit( const CGHeroInstance * h ) const
 	TeleportDialog td(h->id, channel);
 	if(isEntrance())
 	{
-		if(cb->isTeleportChannelBidirectional(channel) && 1 < cb->getTeleportChannelExits(channel).size())
+		if(cb->getTeleportChannelExits(channel).size() > 1)
 		{
 			auto exits = cb->getTeleportChannelExits(channel);
 			for(const auto & exit : exits)
