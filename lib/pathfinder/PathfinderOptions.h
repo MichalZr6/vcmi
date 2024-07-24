@@ -98,6 +98,7 @@ public:
 	PathfinderConfig(
 		std::shared_ptr<INodeStorage> nodeStorage,
 		std::vector<std::shared_ptr<IPathfindingRule>> rules);
+	void checkIfTownlessAndAllowOneWayTeleports(const CGHeroInstance *);
 	virtual ~PathfinderConfig() = default;
 
 	virtual CPathfinderHelper * getOrCreatePathfinderHelper(const PathNodeInfo & source, CGameState * gs) = 0;

@@ -59,6 +59,8 @@ namespace AIPathfinding
 		auto hero = aiNodeStorage->getHero(source.node);
 		auto & helper = pathfindingHelpers[hero];
 
+		checkIfTownlessAndAllowOneWayTeleports(hero);
+
 		if(!helper)
 		{
 			helper.reset(new CPathfinderHelper(gs, hero, options));

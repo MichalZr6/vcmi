@@ -15,6 +15,7 @@
 #include "NodeStorage.h"
 #include "PathfindingRules.h"
 #include "CPathfinder.h"
+#include "mapObjects/CGHeroInstance.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -44,6 +45,18 @@ PathfinderConfig::PathfinderConfig(std::shared_ptr<INodeStorage> nodeStorage, st
 {
 }
 
+void PathfinderConfig::checkIfTownlessAndAllowOneWayTeleports(const CGHeroInstance * hero)
+{
+	// FIXME: should be enabled by default with some bigger AI refactor so that main heroes are strong enough to
+	// go through and/or enable scouts (at some point ?) to visit such monoliths
+	// see first TODO in the top of PathfinderOptions.h
+	if (hero->cb->howManyTowns(hero->getOwner()) == 0)
+	{
+		options.useTeleportOneWay = true;
+		options.useTeleportOneWayRandom = true;
+	}
+}
+
 std::vector<std::shared_ptr<IPathfindingRule>> SingleHeroPathfinderConfig::buildRuleSet()
 {
 	return std::vector<std::shared_ptr<IPathfindingRule>>{
@@ -60,6 +73,7 @@ SingleHeroPathfinderConfig::~SingleHeroPathfinderConfig() = default;
 SingleHeroPathfinderConfig::SingleHeroPathfinderConfig(CPathsInfo & out, CGameState * gs, const CGHeroInstance * hero)
 	: PathfinderConfig(std::make_shared<NodeStorage>(out, hero), buildRuleSet())
 {
+	checkIfTownlessAndAllowOneWayTeleports(hero);
 	pathfinderHelper = std::make_unique<CPathfinderHelper>(gs, hero, options);
 }
 
