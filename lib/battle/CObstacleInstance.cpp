@@ -24,21 +24,21 @@ const ObstacleInfo & CObstacleInstance::getInfo() const
 	return *Obstacle(ID).getInfo();
 }
 
-std::vector<BattleHex> CObstacleInstance::getBlockedTiles() const
+BattleHexArray CObstacleInstance::getBlockedTiles() const
 {
 	if(blocksTiles())
 		return getAffectedTiles();
-	return std::vector<BattleHex>();
+	return BattleHexArray();
 }
 
-std::vector<BattleHex> CObstacleInstance::getStoppingTile() const
+BattleHexArray CObstacleInstance::getStoppingTile() const
 {
 	if(stopsMovement())
 		return getAffectedTiles();
-	return std::vector<BattleHex>();
+	return BattleHexArray();
 }
 
-std::vector<BattleHex> CObstacleInstance::getAffectedTiles() const
+BattleHexArray CObstacleInstance::getAffectedTiles() const
 {
 	switch(obstacleType)
 	{
@@ -47,7 +47,7 @@ std::vector<BattleHex> CObstacleInstance::getAffectedTiles() const
 		return getInfo().getBlocked(pos);
 	default:
 		assert(0);
-		return std::vector<BattleHex>();
+		return BattleHexArray();
 	}
 }
 
@@ -220,7 +220,7 @@ void SpellCreatedObstacle::serializeJson(JsonSerializeFormat & handler)
 	}
 }
 
-std::vector<BattleHex> SpellCreatedObstacle::getAffectedTiles() const
+BattleHexArray SpellCreatedObstacle::getAffectedTiles() const
 {
 	return customSize;
 }

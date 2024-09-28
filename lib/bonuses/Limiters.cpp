@@ -221,12 +221,12 @@ ILimiter::EDecision UnitOnHexLimiter::limit(const BonusLimitationContext &contex
 
 	auto accept = false;
 	for (const auto & hex : stack->getHexes())
-		accept |= !!applicableHexes.count(hex);
+		accept |= !!applicableHexes.contains(hex);
 
 	return accept ? ILimiter::EDecision::ACCEPT : ILimiter::EDecision::DISCARD;
 }
 
-UnitOnHexLimiter::UnitOnHexLimiter(const std::set<BattleHex> & applicableHexes):
+UnitOnHexLimiter::UnitOnHexLimiter(const BattleHexArray & applicableHexes):
 	applicableHexes(applicableHexes)
 {
 }

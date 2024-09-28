@@ -22,6 +22,7 @@ class CGHeroInstance;
 class CArmedInstance;
 class IBattleState;
 class BattleInfo;
+class BattleHexArray;
 
 struct DLL_LINKAGE BattleStart : public CPackForClient
 {
@@ -170,7 +171,7 @@ struct DLL_LINKAGE BattleStackMoved : public CPackForClient
 {
 	BattleID battleID = BattleID::NONE;
 	ui32 stack = 0;
-	std::vector<BattleHex> tilesToMove;
+	BattleHexArray tilesToMove;
 	int distance = 0;
 	bool teleporting = false;
 

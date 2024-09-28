@@ -77,17 +77,17 @@ bool ExplorationHelper::scanMap()
 		{
 			if(ts->fogOfWarMap[pos.z][pos.x][pos.y])
 			{
-				bool hasInvisibleNeighbor = false;
+				bool hasInvisibleneighbour = false;
 
 				foreach_neighbour(cbp, pos, [&](CCallback * cbp, int3 neighbour)
 					{
 						if(!ts->fogOfWarMap[neighbour.z][neighbour.x][neighbour.y])
 						{
-							hasInvisibleNeighbor = true;
+							hasInvisibleneighbour = true;
 						}
 					});
 
-				if(hasInvisibleNeighbor)
+				if(hasInvisibleneighbour)
 					edgeTiles.push_back(pos);
 			}
 		});
@@ -202,7 +202,7 @@ int ExplorationHelper::howManyTilesWillBeDiscovered(const int3 & pos) const
 				&& !slice[npos.x][npos.y])
 			{
 				if(allowDeadEndCancellation
-					&& !hasReachableNeighbor(npos))
+					&& !hasReachableneighbour(npos))
 				{
 					continue;
 				}
@@ -215,7 +215,7 @@ int ExplorationHelper::howManyTilesWillBeDiscovered(const int3 & pos) const
 	return ret;
 }
 
-bool ExplorationHelper::hasReachableNeighbor(const int3 & pos) const
+bool ExplorationHelper::hasReachableneighbour(const int3 & pos) const
 {
 	for(const int3 & dir : int3::getDirs())
 	{
