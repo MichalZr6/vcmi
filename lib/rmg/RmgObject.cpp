@@ -72,7 +72,7 @@ const rmg::Area & Object::Instance::getAccessibleArea() const
 	if(dAccessibleAreaCache.empty())
 	{
 		auto neighbours = rmg::Area({getVisitablePosition()}).getBorderOutside();
-		// FIXME: Blocked area of removable object is also accessible area for neighbors
+		// FIXME: Blocked area of removable object is also accessible area for neighbours
 		rmg::Area visitable = rmg::Area(neighbours) - getBlockedArea();
 		// TODO: Add in one operation to avoid multiple invalidation
 		for(const auto & from : visitable.getTilesVector())

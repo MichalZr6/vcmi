@@ -422,7 +422,7 @@ MovementAnimation::~MovementAnimation()
 		CCS->soundh->stopSound(moveSoundHandler);
 }
 
-MovementAnimation::MovementAnimation(BattleInterface & owner, const CStack *stack, std::vector<BattleHex> _destTiles, int _distance)
+MovementAnimation::MovementAnimation(BattleInterface & owner, const CStack *stack, BattleHexArray _destTiles, int _distance)
 	: StackMoveAnimation(owner, stack, stack->getPosition(), _destTiles.front()),
 	  destTiles(_destTiles),
 	  currentMoveIndex(0),
@@ -891,7 +891,7 @@ EffectAnimation::EffectAnimation(BattleInterface & owner, const AnimationPath & 
 	logAnim->debug("CPointEffectAnimation::init: effect %s", animationName.getName());
 }
 
-EffectAnimation::EffectAnimation(BattleInterface & owner, const AnimationPath & animationName, std::vector<BattleHex> hex, int effects, bool reversed):
+EffectAnimation::EffectAnimation(BattleInterface & owner, const AnimationPath & animationName, BattleHexArray hex, int effects, bool reversed):
 	EffectAnimation(owner, animationName, effects, reversed)
 {
 	battlehexes = hex;
@@ -901,7 +901,7 @@ EffectAnimation::EffectAnimation(BattleInterface & owner, const AnimationPath & 
 	EffectAnimation(owner, animationName, effects, reversed)
 {
 	assert(hex.isValid());
-	battlehexes.push_back(hex);
+	battlehexes.insert(hex);
 }
 
 EffectAnimation::EffectAnimation(BattleInterface & owner, const AnimationPath & animationName, std::vector<Point> pos, int effects, bool reversed):
@@ -920,7 +920,7 @@ EffectAnimation::EffectAnimation(BattleInterface & owner, const AnimationPath & 
 	EffectAnimation(owner, animationName, effects, reversed)
 {
 	assert(hex.isValid());
-	battlehexes.push_back(hex);
+	battlehexes.insert(hex);
 	positions.push_back(pos);
 }
 

@@ -79,7 +79,7 @@ void ObstaclePlacer::process()
 			toBlock.clear();
 			for (const auto& tile : areaPossible->getTilesVector())
 			{
-				rmg::Area neighbors;
+				rmg::Area neighbours;
 				rmg::Area t;
 				t.add(tile);
 
@@ -88,15 +88,15 @@ void ObstaclePlacer::process()
 					//Area outside the map is also impassable
 					if (!map.isOnMap(n) || map.shouldBeBlocked(n))
 					{
-						neighbors.add(n);
+						neighbours.add(n);
 					}
 				}
-				if (neighbors.empty())
+				if (neighbours.empty())
 				{
 					continue;
 				}
 				//Will only be added if it doesn't connect two disjointed blocks
-				if (neighbors.connected(true)) //Do not block diagonal pass
+				if (neighbours.connected(true)) //Do not block diagonal pass
 				{
 					toBlock.add(tile);
 				}

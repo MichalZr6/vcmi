@@ -15,6 +15,7 @@
 #include "ESerializationVersion.h"
 #include "Serializeable.h"
 #include "../mapObjects/CArmedInstance.h"
+#include "../battle/BattleHexArray.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -328,6 +329,12 @@ public:
 		*this & length;
 		for(auto i = d.begin(); i != d.end(); i++)
 			save(*i);
+	}
+
+	void save(const BattleHexArray & data)
+	{
+		for(BattleHex hex : data)
+			save(hex);
 	}
 
 	void save(const std::string &data)

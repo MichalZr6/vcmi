@@ -360,7 +360,7 @@ CDrawTerrainOperation::ValidationResult CDrawTerrainOperation::validateTerrainVi
 		const TerrainType * terType = nullptr;
 		if(!map->isInTheMap(currentPos))
 		{
-			// position is not in the map, so take the ter type from the neighbor tile
+			// position is not in the map, so take the ter type from the neighbour tile
 			bool widthTooHigh = currentPos.x >= map->width;
 			bool widthTooLess = currentPos.x < 0;
 			bool heightTooHigh = currentPos.y >= map->height;
