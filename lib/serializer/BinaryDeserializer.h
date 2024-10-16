@@ -454,6 +454,7 @@ public:
 		}
 	}
 
+	/* should work but doesn't... why ?
 	void load(BattleHexArray & data)
 	{
 		uint32_t length = readAndCheckLength();
@@ -464,7 +465,7 @@ public:
 			load(ins);
 			data.insert(ins);
 		}
-	}
+	}*/
 
 	void load(std::string &data)
 	{

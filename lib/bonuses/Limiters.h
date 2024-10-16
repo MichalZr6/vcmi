@@ -263,7 +263,7 @@ public:
 	template <typename Handler> void serialize(Handler &h)
 	{
 		h & static_cast<ILimiter&>(*this);
-		h & applicableHexes;
+		h & applicableHexes.toVector();
 	}
 };
 

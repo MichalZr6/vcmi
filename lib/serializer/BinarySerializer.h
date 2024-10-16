@@ -331,11 +331,12 @@ public:
 			save(*i);
 	}
 
+	/* should work but doesn't... why ?
 	void save(const BattleHexArray & data)
 	{
 		for(BattleHex hex : data)
 			save(hex);
-	}
+	}*/
 
 	void save(const std::string &data)
 	{

@@ -184,7 +184,7 @@ struct DLL_LINKAGE BattleStackMoved : public CPackForClient
 	{
 		h & battleID;
 		h & stack;
-		h & tilesToMove;
+		h & tilesToMove.toVector();
 		h & distance;
 		h & teleporting;
 		assert(battleID != BattleID::NONE);

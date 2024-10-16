@@ -126,7 +126,7 @@ public:
 		internalStorage.pop_back();
 	}
 
-	inline BattleHexArray toVector() const noexcept
+	inline std::vector<BattleHex> toVector() const noexcept
 	{
 		return internalStorage;
 	}

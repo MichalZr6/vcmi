@@ -135,7 +135,7 @@ struct DLL_LINKAGE SpellCreatedObstacle : CObstacleInstance
 		h & minimalDamage;
 		h & trap;
 
-		h & customSize;
+		h & customSize.toVector();
 	}
 };
 

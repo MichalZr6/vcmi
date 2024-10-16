@@ -572,6 +572,7 @@ void BattleFlowProcessor::onActionMade(const CBattleInfoCallback & battle, const
 		assert(actedStack != nullptr);
 
 		// NOTE: in case of random spellcaster, (e.g. Master Genie) spell has been selected by server and was not present in action received from player
+
 		if(actedStack->castSpellThisTurn && ba.spell.hasValue() && ba.spell.toSpell()->canCastWithoutSkip())
 		{
 			setActiveStack(battle, actedStack);
