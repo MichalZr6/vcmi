@@ -60,8 +60,9 @@ std::unique_ptr<CMap> Helper::openMapInternal(const QString & filenameSelect, IG
 		
 		if(!modList.empty())
 			throw ModIncompatibility(modList);
-		
-		return mapService.loadMap(resId, cb);
+
+		mapService.setCallback(cb);
+		return mapService.loadMap(resId);
 	}
 	else
 		throw std::runtime_error("Corrupted map");
@@ -108,12 +109,14 @@ void Helper::saveCampaign(std::shared_ptr<CampaignState> campaignState, const QS
 	for(auto & scenario : campaignState->allScenarios())
 	{
 		EditorCallback cb(nullptr);
-		auto map = campaignState->getMap(scenario, &cb);
+		CMapService mapService;
+		mapService.setCallback(&cb);
+		auto map = campaignState->getMap(scenario, &mapService);
 		cb.setMap(map.get());
-		MapController::repairMap(map.get());
+		MapController::repairMap(map.get(), &cb);
 		CMemoryBuffer serializeBuffer;
 		{
-			CMapSaverJson jsonSaver(&serializeBuffer);
+			CMapSaverJson jsonSaver(&serializeBuffer, &cb);
 			jsonSaver.saveMap(map);
 		}
 

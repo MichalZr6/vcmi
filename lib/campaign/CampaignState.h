@@ -29,6 +29,7 @@ class CMapHeader;
 class CMapInfo;
 class JsonNode;
 class IGameInfoCallback;
+class IMapService;
 
 class DLL_LINKAGE CampaignHeader : public boost::noncopyable
 {
@@ -297,7 +298,7 @@ public:
 	/// Returns true if all available scenarios have been completed and campaign is finished
 	bool isCampaignFinished() const;
 
-	std::unique_ptr<CMap> getMap(CampaignScenarioID scenarioId, IGameInfoCallback * cb);
+	std::unique_ptr<CMap> getMap(CampaignScenarioID scenarioId, const IMapService * ms);
 	std::unique_ptr<CMapHeader> getMapHeader(CampaignScenarioID scenarioId) const;
 	std::shared_ptr<CMapInfo> getMapInfo(CampaignScenarioID scenarioId) const;
 

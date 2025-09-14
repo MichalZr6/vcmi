@@ -70,7 +70,8 @@ void HeroArtifactsWidget::onCancelButtonClicked()
 
 void HeroArtifactsWidget::onSaveArtifact(int32_t artifactIndex, ArtifactPosition slot) 
 {
-	auto artifact = controller.map()->createArtifact(LIBRARY->arth->getByIndex(artifactIndex)->getId());
+	auto artifact = controller.map()->createArtifact(LIBRARY->arth->getByIndex(artifactIndex)->getId(),
+													 controller.getCallback());
 	fittingSet.putArtifact(slot, artifact);
 	addArtifactToTable(artifactIndex, slot);
 }
@@ -97,11 +98,13 @@ void HeroArtifactsWidget::obtainData()
 	std::vector<const CArtifact *> combinedArtifactsParts;
 	for (const auto & [artPosition, artSlotInfo] : fittingSet.artifactsWorn)
 	{
-		addArtifactToTable(LIBRARY->arth->getById(artSlotInfo.getArt()->getTypeId())->getIndex(), artPosition);
+		auto artID = controller.map()->getArtifactInstance(artSlotInfo.artifactID)->getTypeId();
+		addArtifactToTable(LIBRARY->arth->getById(artID)->getIndex(), artPosition);
 	}
 	for (const auto & art : hero.artifactsInBackpack)
 	{
-		addArtifactToTable(LIBRARY->arth->getById(art.getArt()->getTypeId())->getIndex(), ArtifactPosition::BACKPACK_START);
+		auto artID = controller.map()->getArtifactInstance(art.artifactID)->getTypeId();
+		addArtifactToTable(LIBRARY->arth->getById(artID)->getIndex(), ArtifactPosition::BACKPACK_START);
 	}
 }
 
@@ -180,7 +183,7 @@ void HeroArtifactsDelegate::updateModelData(QAbstractItemModel * model, const QM
 	textList += QString("%1:").arg(QString::fromStdString(NArtifactPosition::backpack));
 	for(const auto & art : hero.artifactsInBackpack)
 	{
-		textList += QString::fromStdString(art.getArt()->getType()->getNameTranslated());
+		textList += QString::fromStdString(controller.map()->getArtifactInstance(art.artifactID)->getType()->getNameTranslated());
 	}
 	setModelTextData(model, index, textList);
 }

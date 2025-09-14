@@ -188,7 +188,7 @@ void CGameState::init(const IMapService * mapService, StartInfo * si, IGameRando
 		initNewGame(mapService, randomGenerator, allowSavingRandomMap, progressTracking);
 		break;
 	case EStartMode::CAMPAIGN:
-		initCampaign();
+		initCampaign(mapService);
 		break;
 	default:
 		logGlobal->error("Wrong mode: %d", static_cast<int>(scenarioOps->mode));
@@ -361,14 +361,14 @@ void CGameState::initNewGame(const IMapService * mapService, vstd::RNG & randomG
 	{
 		logGlobal->info("Open map file: %s", scenarioOps->mapname);
 		const ResourcePath mapURI(scenarioOps->mapname, EResType::MAP);
-		map = mapService->loadMap(mapURI, this);
+		map = mapService->loadMap(mapURI);
 	}
 }
 
-void CGameState::initCampaign()
+void CGameState::initCampaign(const IMapService * ms)
 {
 	campaign = std::make_unique<CGameStateCampaign>(this);
-	map = campaign->getCurrentMap();
+	map = campaign->getCurrentMap(ms);
 }
 
 void CGameState::initGlobalBonuses()
@@ -1603,12 +1603,12 @@ TeamState::TeamState()
 
 CArtifactInstance * CGameState::createScroll(const SpellID & spellId)
 {
-	return map->createScroll(spellId);
+	return map->createScroll(spellId, this);
 }
 
 CArtifactInstance * CGameState::createArtifact(const ArtifactID & artID, const SpellID & spellId)
 {
-	return map->createArtifact(artID, spellId);
+	return map->createArtifact(artID, this, spellId);
 }
 
 void CGameState::saveGame(CSaveFile & file) const

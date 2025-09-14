@@ -173,6 +173,7 @@ CArtifactInstance::CArtifactInstance(IGameInfoCallback *cb)
 	: CBonusSystemNode(BonusNodeType::ARTIFACT_INSTANCE)
 	, CCombinedArtifactInstance(cb)
 {
+	assert(cb);
 }
 
 std::string CArtifactInstance::nodeName() const

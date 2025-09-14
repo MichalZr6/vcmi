@@ -38,6 +38,7 @@ class Modificator
 {
 public:
 	Modificator() = delete;
+
 	Modificator(Zone & zone, RmgMap & map, CMapGenerator & generator);
 	
 	virtual void init() {/*override to add dependencies*/}

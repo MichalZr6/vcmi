@@ -251,7 +251,8 @@ std::string getTerrainFilename(int i)
 		return "level-" + std::to_string(i + 1) + "_terrain.json";
 }
 
-CMapFormatJson::CMapFormatJson():
+CMapFormatJson::CMapFormatJson(IGameInfoCallback * cb):
+	GameCallbackHolder(cb),
 	fileVersionMajor(0), fileVersionMinor(0),
 	mapObjectResolver(std::make_unique<MapObjectResolver>(this)),
 	map(nullptr), mapHeader(nullptr)
@@ -702,7 +703,8 @@ void CMapFormatJson::serializePredefinedHeroes(JsonSerializeFormat & handler)
 		{
 			auto predefinedHero = handler.enterStruct(p.first);
 
-			auto hero = std::make_shared<CGHeroInstance>(map->cb);
+			auto hero = std::make_shared<CGHeroInstance>(cb);
+
 			hero->ID = Obj::HERO;
 			hero->setHeroTypeName(p.first);
 			hero->serializeJsonDefinition(handler);
@@ -742,7 +744,9 @@ void CMapFormatJson::writeOptions(JsonSerializer & handler)
 }
 
 ///CMapPatcher
-CMapPatcher::CMapPatcher(const JsonNode & stream): input(stream)
+CMapPatcher::CMapPatcher(const JsonNode & stream, IGameInfoCallback * cb) :
+	CMapFormatJson(cb),
+	input(stream)
 {
 	//todo: update map patches and change this
 	fileVersionMajor = 0;
@@ -769,17 +773,18 @@ void CMapPatcher::readPatchData()
 }
 
 ///CMapLoaderJson
-CMapLoaderJson::CMapLoaderJson(CInputStream * stream)
-	: buffer(stream)
+CMapLoaderJson::CMapLoaderJson(CInputStream * stream, IGameInfoCallback * cb)
+	: CMapFormatJson(cb)
+	, buffer(stream)
 	, ioApi(new CProxyROIOApi(buffer))
 	, loader("", "_", ioApi)
 {
 }
 
-std::unique_ptr<CMap> CMapLoaderJson::loadMap(IGameInfoCallback * cb)
+std::unique_ptr<CMap> CMapLoaderJson::loadMap()
 {
 	LOG_TRACE(logGlobal);
-	auto result = std::make_unique<CMap>(cb);
+	auto result = std::make_unique<CMap>();
 	map = result.get();
 	mapHeader = map;
 	readMap();
@@ -1053,7 +1058,7 @@ void CMapLoaderJson::MapObjectLoader::construct()
 	appearance->readJson(configuration["template"], false);
 
 	// Will be destroyed soon and replaced with shared template
-	instance = handler->create(owner->map->cb, appearance);
+	instance = handler->create(owner->cb, appearance);
 
 	instance->instanceName = jsonKey;
 	instance->setAnchorPos(pos);
@@ -1093,7 +1098,7 @@ void CMapLoaderJson::MapObjectLoader::configure()
 			artID = art->getArtifactType();
 		}
 
-		art->setArtifactInstance(owner->map->createArtifact(artID, spellID.getNum()));
+		art->setArtifactInstance(owner->map->createArtifact(artID, owner->cb, spellID.getNum()));
  	}
 
 	if(auto hero = std::dynamic_pointer_cast<CGHeroInstance>(instance))
@@ -1149,8 +1154,9 @@ void CMapLoaderJson::readTranslations()
 
 
 ///CMapSaverJson
-CMapSaverJson::CMapSaverJson(CInputOutputStream * stream)
-	: buffer(stream)
+CMapSaverJson::CMapSaverJson(CInputOutputStream * stream, IGameInfoCallback * cb)
+	: CMapFormatJson(cb)
+	, buffer(stream)
 	, ioApi(new CProxyIOApi(buffer))
 	, saver(ioApi, "_")
 {

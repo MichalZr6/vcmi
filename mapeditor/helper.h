@@ -19,7 +19,7 @@ class IGameInfoCallback;
 
 namespace Helper
 {
-	std::unique_ptr<CMap> openMapInternal(const QString &, IGameInfoCallback *);
+	std::unique_ptr<CMap> openMapInternal(const QString &, IGameInfoCallback * cb);
 	std::shared_ptr<CampaignState> openCampaignInternal(const QString &);
 	std::map<std::string, std::shared_ptr<CRmgTemplate>> openTemplateInternal(const QString &);
 	void saveCampaign(std::shared_ptr<CampaignState> campaignState, const QString & filename);

@@ -75,7 +75,7 @@ bool MinePlacer::placeMines(ObjectManager & manager)
 			}
 
 			const auto & rmginfo = mineHandler->getRMGInfo();
-			auto mine = std::dynamic_pointer_cast<CGMine>(mineHandler->create(map.mapInstance->cb, nullptr));
+			auto mine = std::dynamic_pointer_cast<CGMine>(mineHandler->create(map.cb, nullptr));
 			mine->producedResource = res;
 			mine->tempOwner = PlayerColor::NEUTRAL;
 			mine->producedQuantity = mine->defaultResProduction();
@@ -106,7 +106,7 @@ bool MinePlacer::placeMines(ObjectManager & manager)
 		{
 			for(int rc = zone.getRand().nextInt(1, extraRes); rc > 0; --rc)
 			{
-				auto resource = std::dynamic_pointer_cast<CGResource>(LIBRARY->objtypeh->getHandlerFor(Obj::RESOURCE, mine->producedResource)->create(map.mapInstance->cb, nullptr));
+				auto resource = std::dynamic_pointer_cast<CGResource>(LIBRARY->objtypeh->getHandlerFor(Obj::RESOURCE, mine->producedResource)->create(map.cb, nullptr));
 
 				RequiredObjectInfo roi;
 				roi.obj = resource;

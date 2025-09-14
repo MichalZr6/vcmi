@@ -566,6 +566,7 @@ void CGameHandler::init(StartInfo *si, Load::ProgressAccumulator & progressTrack
 {
 	CMapService mapService;
 	gs = std::make_shared<CGameState>();
+	mapService.setCallback(gs.get());
 	int requestedSeed = settings["server"]["seed"].Integer();
 	randomizer = std::make_unique<GameRandomizer>(*gs);
 	if (requestedSeed != 0)
@@ -1611,8 +1612,8 @@ void CGameHandler::load(const StartInfo &info)
 
 	reinitScripting();
 
-	CLoadFile lf(*CResourceHandler::get()->getResourceName(ResourcePath(stem.to_string(), EResType::SAVEGAME)), gs.get());
 	gs = std::make_shared<CGameState>();
+	CLoadFile lf(*CResourceHandler::get()->getResourceName(ResourcePath(stem.to_string(), EResType::SAVEGAME)), gs.get());
 	randomizer = std::make_unique<GameRandomizer>(*gs);
 	gs->loadGame(lf);
 	logGlobal->info("Loading server state");

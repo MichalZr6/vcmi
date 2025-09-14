@@ -59,7 +59,7 @@ struct DLL_LINKAGE Rumor
 };
 
 /// The map contains the map header, the tiles of the terrain, objects, heroes, towns, rumors...
-class DLL_LINKAGE CMap : public CMapHeader, public GameCallbackHolder
+class DLL_LINKAGE CMap : public CMapHeader
 {
 	friend class CSerializer;
 
@@ -81,7 +81,7 @@ public:
 	/// TODO: make private
 	std::vector<std::shared_ptr<CGObjectInstance>> objects;
 
-	explicit CMap(IGameInfoCallback *cb);
+	CMap();
 	~CMap();
 	void initTerrain();
 
@@ -100,17 +100,17 @@ public:
 	void saveCompatibilityAddMissingArtifact(std::shared_ptr<CArtifactInstance> artifact);
 
 	/// Creates instance of spell scroll artifact with provided spell
-	CArtifactInstance * createScroll(const SpellID & spellId);
+	CArtifactInstance * createScroll(const SpellID & spellId, IGameInfoCallback * cb);
 
 	/// Creates instance of requested artifact
 	/// For combined artifact this method will also create alll required components
 	/// For scrolls this method will also initialize its spell
-	CArtifactInstance * createArtifact(const ArtifactID & artId, const SpellID & spellId = SpellID::NONE);
+	CArtifactInstance * createArtifact(const ArtifactID & artId, IGameInfoCallback * cb, const SpellID & spellId = SpellID::NONE);
 
 	/// Creates single instance of requested artifact
 	/// Does NOT creates components for combined artifacts
 	/// Does NOT initializes spell when spell scroll artifact is created
-	CArtifactInstance * createArtifactComponent(const ArtifactID & artId);
+	CArtifactInstance * createArtifactComponent(const ArtifactID & artId, IGameInfoCallback * cb);
 
 	/// Returns pointer to requested Artifact Instance. Throws on invalid ID
 	CArtifactInstance * getArtifactInstance(const ArtifactInstanceID & artifactID);
@@ -277,7 +277,7 @@ public:
 	void overrideGameSetting(EGameSettings option, const JsonNode & input);
 	const IGameSettings & getSettings() const;
 
-	void saveCompatibilityStoreAllocatedArtifactID();
+	void saveCompatibilityStoreAllocatedArtifactID(IGameInfoCallback * cb);
 	void parseUidCounter();
 
 private:
@@ -303,7 +303,7 @@ public:
 
 		if (!h.hasFeature(Handler::Version::NO_RAW_POINTERS_IN_SERIALIZER))
 		{
-			saveCompatibilityStoreAllocatedArtifactID();
+			saveCompatibilityStoreAllocatedArtifactID(nullptr);
 			std::vector< std::shared_ptr<CQuest> > quests;
 			h & quests;
 		}

@@ -20,11 +20,13 @@
 #include "../../lib/campaign/CampaignState.h"
 #include "../../lib/mapping/CMap.h"
 #include "../../lib/constants/StringConstants.h"
+#include "../../lib/mapping/CMapService.h"
 
-ScenarioProperties::ScenarioProperties(std::shared_ptr<CampaignState> campaignState, CampaignScenarioID scenario):
+ScenarioProperties::ScenarioProperties(std::shared_ptr<CampaignState> campaignState, CampaignScenarioID scenario,
+									   const IMapService * mapService):
 	ui(new Ui::ScenarioProperties),
 	campaignState(campaignState),
-	map(campaignState->getMap(scenario, nullptr)),
+	map(campaignState->getMap(scenario, mapService)),
 	scenario(scenario)
 {
 	ui->setupUi(this);
@@ -128,7 +130,8 @@ ScenarioProperties::~ScenarioProperties()
 
 void ScenarioProperties::reloadMapRelatedUi()
 {
-	map = campaignState->getMap(scenario, nullptr);
+	CMapService mapService;
+	map = campaignState->getMap(scenario, &mapService);
 
 	ui->lineEditMapFile->setText(QString::fromStdString(campaignState->scenarios.at(scenario).mapName));
 	ui->lineEditScenarioName->setText(map ? QString::fromStdString(map->name.toString()) : tr("No map"));
@@ -258,7 +261,9 @@ bool ScenarioProperties::showScenarioProperties(std::shared_ptr<CampaignState> c
 	if(!campaignState || scenario == CampaignScenarioID::NONE)
 		return false;
 
-	auto * dialog = new ScenarioProperties(campaignState, scenario);
+	CMapService mapService;
+
+	auto * dialog = new ScenarioProperties(campaignState, scenario, &mapService);
 
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 

@@ -44,11 +44,14 @@
 #include "../spells/CSpellHandler.h"
 #include "../texts/TextOperations.h"
 #include "entities/hero/CHeroClass.h"
+#include "../lib/callback/EditorCallback.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-CMapLoaderH3M::CMapLoaderH3M(const std::string & mapName, const std::string & modName, const std::string & encodingName, CInputStream * stream)
-	: map(nullptr)
+CMapLoaderH3M::CMapLoaderH3M(const std::string & mapName, const std::string & modName,
+							 const std::string & encodingName, CInputStream * stream, IGameInfoCallback * cb)
+	: GameCallbackHolder(cb)
+	, map()
 	, reader(new MapReaderH3M(stream))
 	, inputStream(stream)
 	, mapName(TextOperations::convertMapName(mapName))
@@ -60,11 +63,15 @@ CMapLoaderH3M::CMapLoaderH3M(const std::string & mapName, const std::string & mo
 //must be instantiated in .cpp file for access to complete types of all member fields
 CMapLoaderH3M::~CMapLoaderH3M() = default;
 
-std::unique_ptr<CMap> CMapLoaderH3M::loadMap(IGameInfoCallback * cb)
+std::unique_ptr<CMap> CMapLoaderH3M::loadMap()
 {
 	// Init map object by parsing the input buffer
-	map = new CMap(cb);
+	map = new CMap;
 	mapHeader = std::unique_ptr<CMapHeader>(dynamic_cast<CMapHeader *>(map));
+	auto mapInfoCallback = dynamic_cast<EditorCallback *>(cb);
+	if(mapInfoCallback)
+		mapInfoCallback->setMap(map);
+
 	init();
 
 	return std::unique_ptr<CMap>(dynamic_cast<CMap *>(mapHeader.release()));
@@ -835,7 +842,7 @@ void CMapLoaderH3M::readPredefinedHeroes()
 			continue;
 
 		auto handler = LIBRARY->objtypeh->getHandlerFor(Obj::HERO, HeroTypeID(heroID).toHeroType()->heroClass->getIndex());
-		auto object = handler->create(map->cb, handler->getTemplates().front());
+		auto object = handler->create(cb, handler->getTemplates().front());
 		auto hero = std::dynamic_pointer_cast<CGHeroInstance>(object);
 		hero->subID = heroID;
 
@@ -969,7 +976,7 @@ bool CMapLoaderH3M::loadArtifactToSlot(CGHeroInstance * hero, int slot)
 	// Artifact seems to be missing in game, so skip artifacts that don't fit target slot
 	if(ArtifactID(artifactID).toArtifact()->canBePutAt(hero, ArtifactPosition(slot)))
 	{
-		auto * artifact = map->createArtifact(artifactID, scrollSpell);
+		auto * artifact = map->createArtifact(artifactID, cb, scrollSpell);
 		map->putArtifactInstance(*hero, artifact->getId(), slot);
 	}
 	else
@@ -1032,7 +1039,7 @@ void CMapLoaderH3M::readObjectTemplates()
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readEvent(const int3 & mapPosition, const ObjectInstanceID & idToBeGiven)
 {
-	auto object = std::make_shared<CGEvent>(map->cb);
+	auto object = std::make_shared<CGEvent>(cb);
 
 	readBoxContent(object.get(), mapPosition, idToBeGiven);
 
@@ -1054,7 +1061,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readEvent(const int3 & mapPosit
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readPandora(const int3 & mapPosition, const ObjectInstanceID & idToBeGiven)
 {
-	auto object = std::make_shared<CGPandoraBox>(map->cb);
+	auto object = std::make_shared<CGPandoraBox>(cb);
 	readBoxContent(object.get(), mapPosition, idToBeGiven);
 
 	if(features.levelHOTA5)
@@ -1147,7 +1154,7 @@ void CMapLoaderH3M::readBoxHotaContent(CGPandoraBox * object, const int3 & mapPo
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readMonster(const int3 & mapPosition, const ObjectInstanceID & objectInstanceID)
 {
-	auto object = std::make_shared<CGCreature>(map->cb);
+	auto object = std::make_shared<CGCreature>(cb);
 	object->id = objectInstanceID;
 
 	if(features.levelAB)
@@ -1156,7 +1163,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readMonster(const int3 & mapPos
 		questIdentifierToId[object->identifier] = objectInstanceID;
 	}
 
-	auto hlp = std::make_unique<CStackInstance>(map->cb);
+	auto hlp = std::make_unique<CStackInstance>(cb);
 	hlp->setCount(reader->readUInt16());
 
 	//type will be set during initialization
@@ -1212,7 +1219,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readMonster(const int3 & mapPos
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readSign(const int3 & mapPosition)
 {
-	auto object = std::make_shared<CGSignBottle>(map->cb);
+	auto object = std::make_shared<CGSignBottle>(cb);
 	object->message.appendTextID(readLocalizedString(TextIdentifier("sign", mapPosition.x, mapPosition.y, mapPosition.z, "message")));
 	reader->skipZero(4);
 	return object;
@@ -1338,7 +1345,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readScholar(const int3 & positi
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readGarrison(const int3 & mapPosition, const ObjectInstanceID & idToBeGiven)
 {
-	auto object = std::make_shared<CGGarrison>(map->cb);
+	auto object = std::make_shared<CGGarrison>(cb);
 
 	setOwnerAndValidate(mapPosition, object.get(), reader->readPlayer32());
 	readCreatureSet(object.get(), idToBeGiven);
@@ -1354,7 +1361,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readGarrison(const int3 & mapPo
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readArtifact(const int3 & mapPosition, std::shared_ptr<const ObjectTemplate> objectTemplate, const ObjectInstanceID & idToBeGiven)
 {
 	ArtifactID artID = ArtifactID::NONE; //random, set later
-	auto object = std::make_shared<CGArtifact>(map->cb);
+	auto object = std::make_shared<CGArtifact>(cb);
 
 	readMessageAndGuards(object->message, object.get(), mapPosition, idToBeGiven);
 
@@ -1374,24 +1381,24 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readArtifact(const int3 & mapPo
 	}
 
 	if (artID.hasValue())
-		object->setArtifactInstance(map->createArtifact(artID, SpellID::NONE));
+		object->setArtifactInstance(map->createArtifact(artID, cb, SpellID::NONE));
 	// else - random, will be initialized later
 	return object;
 }
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readScroll(const int3 & mapPosition, std::shared_ptr<const ObjectTemplate> objectTemplate, const ObjectInstanceID & idToBeGiven)
 {
-	auto object = std::make_shared<CGArtifact>(map->cb);
+	auto object = std::make_shared<CGArtifact>(cb);
 	readMessageAndGuards(object->message, object.get(), mapPosition, idToBeGiven);
 	SpellID spellID = reader->readSpell32();
 
-	object->setArtifactInstance(map->createArtifact(ArtifactID::SPELL_SCROLL, spellID.getNum()));
+	object->setArtifactInstance(map->createArtifact(ArtifactID::SPELL_SCROLL, cb, spellID.getNum()));
 	return object;
 }
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readResource(const int3 & mapPosition, std::shared_ptr<const ObjectTemplate> objectTemplate, const ObjectInstanceID & idToBeGiven)
 {
-	auto object = std::make_shared<CGResource>(map->cb);
+	auto object = std::make_shared<CGResource>(cb);
 
 	readMessageAndGuards(object->message, object.get(), mapPosition, idToBeGiven);
 
@@ -1411,14 +1418,14 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readResource(const int3 & mapPo
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readMine(const int3 & mapPosition)
 {
-	auto object = std::make_shared<CGMine>(map->cb);
+	auto object = std::make_shared<CGMine>(cb);
 	setOwnerAndValidate(mapPosition, object.get(), reader->readPlayer32());
 	return object;
 }
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readAbandonedMine(const int3 & mapPosition)
 {
-	auto object = std::make_shared<CGMine>(map->cb);
+	auto object = std::make_shared<CGMine>(cb);
 	object->setOwner(PlayerColor::NEUTRAL);
 	reader->readBitmaskResources(object->abandonedMineResources, false);
 
@@ -1441,14 +1448,14 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readAbandonedMine(const int3 & 
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readDwelling(const int3 & position)
 {
-	auto object = std::make_shared<CGDwelling>(map->cb);
+	auto object = std::make_shared<CGDwelling>(cb);
 	setOwnerAndValidate(position, object.get(), reader->readPlayer32());
 	return object;
 }
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readDwellingRandom(const int3 & mapPosition, std::shared_ptr<const ObjectTemplate> objectTemplate)
 {
-	auto object = std::make_shared<CGDwelling>(map->cb);
+	auto object = std::make_shared<CGDwelling>(cb);
 
 	setOwnerAndValidate(mapPosition, object.get(), reader->readPlayer32());
 
@@ -1507,7 +1514,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readShrine(const int3 & positio
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readHeroPlaceholder(const int3 & mapPosition)
 {
-	auto object = std::make_shared<CGHeroPlaceholder>(map->cb);
+	auto object = std::make_shared<CGHeroPlaceholder>(cb);
 
 	setOwnerAndValidate(mapPosition, object.get(), reader->readPlayer());
 
@@ -1572,15 +1579,15 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readHotaBattleLocation(const in
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readGeneric(const int3 & mapPosition, std::shared_ptr<const ObjectTemplate> objectTemplate)
 {
 	if(LIBRARY->objtypeh->knownSubObjects(objectTemplate->id).count(objectTemplate->subid))
-		return LIBRARY->objtypeh->getHandlerFor(objectTemplate->id, objectTemplate->subid)->create(map->cb, objectTemplate);
+		return LIBRARY->objtypeh->getHandlerFor(objectTemplate->id, objectTemplate->subid)->create(cb, objectTemplate);
 
 	logGlobal->warn("Map '%s': Unrecognized object %d:%d ('%s') at %s found!", mapName, objectTemplate->id.toEnum(), objectTemplate->subid, objectTemplate->animationFile.getOriginalName(), mapPosition.toString());
-	return std::make_shared<CGObjectInstance>(map->cb);
+	return std::make_shared<CGObjectInstance>(cb);
 }
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readQuestGuard(const int3 & mapPosition)
 {
-	auto guard = std::make_shared<CGQuestGuard>(map->cb);
+	auto guard = std::make_shared<CGQuestGuard>(cb);
 	readQuest(guard.get(), mapPosition);
 	return guard;
 }
@@ -1940,7 +1947,7 @@ void CMapLoaderH3M::readCreatureSet(CArmedInstance * out, const ObjectInstanceID
 		if(creatureID == CreatureID::NONE)
 			continue;
 
-		auto result = std::make_unique<CStackInstance>(map->cb);
+		auto result = std::make_unique<CStackInstance>(cb);
 		result->setCount(count);
 
 		if(creatureID < CreatureID::NONE)
@@ -2012,7 +2019,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readHero(const int3 & mapPositi
 
 	if (!object)
 	{
-		object = std::make_shared<CGHeroInstance>(map->cb);
+		object = std::make_shared<CGHeroInstance>(cb);
 		object->subID = heroType.getNum();
 	}
 
@@ -2173,7 +2180,7 @@ std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readHero(const int3 & mapPositi
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readSeerHut(const int3 & position, const ObjectInstanceID & idToBeGiven)
 {
-	auto hut = std::make_shared<CGSeerHut>(map->cb);
+	auto hut = std::make_shared<CGSeerHut>(cb);
 
 	uint32_t questsCount = 1;
 
@@ -2465,7 +2472,7 @@ EQuestMission CMapLoaderH3M::readQuest(IQuestObject * guard, const int3 & positi
 
 std::shared_ptr<CGObjectInstance> CMapLoaderH3M::readTown(const int3 & position, std::shared_ptr<const ObjectTemplate> objectTemplate, const ObjectInstanceID & idToBeGiven)
 {
-	auto object = std::make_shared<CGTownInstance>(map->cb);
+	auto object = std::make_shared<CGTownInstance>(cb);
 	if(features.levelAB)
 		object->identifier = reader->readUInt32();
 

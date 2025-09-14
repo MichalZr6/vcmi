@@ -29,7 +29,7 @@ namespace vstd
 class RNG;
 }
 
-class RmgMap
+class RmgMap : public GameCallbackHolder
 {
 public:
 	int getDecorationsPercentage() const;
@@ -38,7 +38,7 @@ public:
 	std::shared_ptr<MapProxy> getMapProxy() const;
 	CMap & getMap(const CMapGenerator *) const; //limited access
 	
-	RmgMap(const CMapGenOptions& mapGenOptions, IGameInfoCallback * cb);
+	RmgMap(const CMapGenOptions & mapGenOptions, IGameInfoCallback * cb);
 	~RmgMap() = default;
 
 	CMapEditManager* getEditManager() const;

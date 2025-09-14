@@ -20,6 +20,7 @@ struct CampaignTravel;
 class CGHeroInstance;
 class CGameState;
 class CMap;
+class IMapService;
 
 namespace vstd
 {
@@ -69,7 +70,7 @@ public:
 	void initTowns();
 
 	bool playerHasStartingHero(PlayerColor player) const;
-	std::unique_ptr<CMap> getCurrentMap();
+	std::unique_ptr<CMap> getCurrentMap(const IMapService * ms);
 
 	template <typename Handler> void serialize(Handler &h)
 	{

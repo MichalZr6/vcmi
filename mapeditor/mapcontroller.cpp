@@ -109,15 +109,13 @@ MinimapScene * MapController::miniScene(int level)
 
 void MapController::repairMap()
 {
-	repairMap(map());
+	repairMap(map(), getCallback());
 }
 
-void MapController::repairMap(CMap * map)
+void MapController::repairMap(CMap * map, IGameInfoCallback * cb)
 {
 	if(!map)
 		return;
-
-	assert(map->cb);
 	
 	//make sure events/rumors has name to have proper identifiers
 	int emptyNameId = 1;
@@ -167,7 +165,7 @@ void MapController::repairMap(CMap * map)
 			{
 				nih->removeSpellFromSpellbook(SpellID::SPELLBOOK_PRESET);
 				if(!nih->getArt(ArtifactPosition::SPELLBOOK) && type->haveSpellBook)
-					nih->putArtifact(ArtifactPosition::SPELLBOOK, map->createArtifact(ArtifactID::SPELLBOOK));
+					nih->putArtifact(ArtifactPosition::SPELLBOOK, map->createArtifact(ArtifactID::SPELLBOOK, cb));
 			}
 			
 		}
@@ -200,7 +198,7 @@ void MapController::repairMap(CMap * map)
 						out.push_back(spell->id);
 					}
 				}
-				auto a = map->createScroll(*RandomGeneratorUtil::nextItem(out, CRandomGenerator::getDefault()));
+				auto a = map->createScroll(*RandomGeneratorUtil::nextItem(out, CRandomGenerator::getDefault()), cb);
 				art->setArtifactInstance(a);
 			}
 		}
@@ -221,7 +219,6 @@ void MapController::repairMap(CMap * map)
 
 void MapController::setMap(std::unique_ptr<CMap> cmap)
 {
-	cmap->cb = _cb.get();
 	_map = std::move(cmap);
 	_cb->setMap(_map.get());
 	
@@ -458,7 +455,7 @@ void MapController::commitObstacleFill(int level)
 	
 	for(auto & sel : _obstaclePainters)
 	{
-		for(auto o : sel.second->placeObstacles(CRandomGenerator::getDefault()))
+		for(auto o : sel.second->placeObstacles(CRandomGenerator::getDefault(), getCallback()))
 		{
 			_mapHandler->invalidate(o.get());
 			_scenes[level]->objectsView.redrawObjects({o.get()});

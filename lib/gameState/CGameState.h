@@ -214,7 +214,7 @@ private:
 	void initTownNames(vstd::RNG & randomGenerator);
 	void initMapObjects(IGameRandomizer & gameRandomizer);
 	void initVisitingAndGarrisonedHeroes();
-	void initCampaign();
+	void initCampaign(const IMapService * ms);
 
 	// ----- bonus system handling -----
 

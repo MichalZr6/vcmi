@@ -70,7 +70,7 @@ public:
 
 	bool isInTheMap(const int3& tile) override;
 
-	std::set<std::shared_ptr<CGObjectInstance>> placeObstacles(vstd::RNG& rand);
+	std::set<std::shared_ptr<CGObjectInstance>> placeObstacles(vstd::RNG& rand, IGameInfoCallback * cb);
 
 private:
 	CMap* map;

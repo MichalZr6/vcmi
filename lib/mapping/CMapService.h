@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../modding/ModVerificationInfo.h"
+#include "../lib/callback/GameCallbackHolder.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -22,7 +23,6 @@ class CInputStream;
 
 class IMapLoader;
 class IMapPatcher;
-class IGameInfoCallback;
 
 /**
  * The map service provides loading of VCMI/H3 map files. It can
@@ -39,7 +39,7 @@ public:
 	 * @param name the name of the map
 	 * @return a unique ptr to the loaded map class
 	 */
-	virtual std::unique_ptr<CMap> loadMap(const ResourcePath & name, IGameInfoCallback * cb) const = 0;
+	virtual std::unique_ptr<CMap> loadMap(const ResourcePath & name) const = 0;
 
 	/**
 	 * Loads the VCMI/H3 map header specified by the name.
@@ -56,7 +56,7 @@ public:
 	 * @param name indicates name of file that will be used during map header patching
 	 * @return a unique ptr to the loaded map class
 	 */
-	virtual std::unique_ptr<CMap> loadMap(const uint8_t * buffer, int size, const std::string & name, const std::string & modName, const std::string & encoding, IGameInfoCallback * cb) const = 0;
+	virtual std::unique_ptr<CMap> loadMap(const uint8_t * buffer, int size, const std::string & name, const std::string & modName, const std::string & encoding) const = 0;
 
 	/**
 	 * Loads the VCMI/H3 map header from a buffer. This method is temporarily
@@ -81,12 +81,15 @@ public:
 	CMapService() = default;
 	virtual ~CMapService() = default;
 
-	std::unique_ptr<CMap> loadMap(const ResourcePath & name, IGameInfoCallback * cb) const override;
+	std::unique_ptr<CMap> loadMap(const ResourcePath & name) const override;
 	std::unique_ptr<CMapHeader> loadMapHeader(const ResourcePath & name) const override;
-	std::unique_ptr<CMap> loadMap(const uint8_t * buffer, int size, const std::string & name, const std::string & modName, const std::string & encoding, IGameInfoCallback * cb) const override;
+	std::unique_ptr<CMap> loadMap(const uint8_t * buffer, int size, const std::string & name, const std::string & modName, const std::string & encoding) const override;
 	std::unique_ptr<CMapHeader> loadMapHeader(const uint8_t * buffer, int size, const std::string & name, const std::string & modName, const std::string & encoding) const override;
 	void saveMap(const std::unique_ptr<CMap> & map, boost::filesystem::path fullPath) const override;
 	
+	void setCallback(IGameInfoCallback * cb);
+	IGameInfoCallback * getCallback();
+
 	/**
 	 * Tests if mods used in the map are currently loaded
 	 * @param map const reference to map header
@@ -95,6 +98,8 @@ public:
 	static ModCompatibilityInfo verifyMapHeaderMods(const CMapHeader & map);
 
 private:
+	IGameInfoCallback * _cb = nullptr;
+
 	/**
 	 * Gets a map input stream object specified by a map name.
 	 *
@@ -119,7 +124,8 @@ private:
 	 * @param stream the input map stream
 	 * @return the constructed map loader
 	 */
-	static std::unique_ptr<IMapLoader> getMapLoader(std::unique_ptr<CInputStream> & stream, std::string mapName, std::string modName, std::string encoding);
+	static std::unique_ptr<IMapLoader> getMapLoader(std::unique_ptr<CInputStream> & stream, std::string mapName,
+													std::string modName, std::string encoding, IGameInfoCallback * cb);
 
 	/**
 	 * Gets a map patcher for specified scenario
@@ -127,7 +133,7 @@ private:
 	 * @param scenarioName for patcher
 	 * @return the constructed map patcher
 	 */
-	static std::unique_ptr<IMapPatcher> getMapPatcher(std::string scenarioName);
+	static std::unique_ptr<IMapPatcher> getMapPatcher(std::string scenarioName, IGameInfoCallback * cb);
 };
 
 /**
@@ -141,7 +147,7 @@ public:
 	 *
 	 * @return a unique ptr of the loaded map class
 	 */
-	virtual std::unique_ptr<CMap> loadMap(IGameInfoCallback * cb) = 0;
+	virtual std::unique_ptr<CMap> loadMap() = 0;
 
 	/**
 	 * Loads the VCMI/H3 map header.

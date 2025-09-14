@@ -22,6 +22,7 @@
 #include "../serializer/JsonDeserializer.h"
 #include "../serializer/JsonSerializer.h"
 #include "../json/JsonUtils.h"
+#include "../lib/callback/MapInfoCallback.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -265,13 +266,12 @@ std::optional<ui8> CampaignState::getBonusID(CampaignScenarioID which) const
 	return chosenCampaignBonuses.at(which);
 }
 
-std::unique_ptr<CMap> CampaignState::getMap(CampaignScenarioID scenarioId, IGameInfoCallback * cb)
+std::unique_ptr<CMap> CampaignState::getMap(CampaignScenarioID scenarioId, const IMapService * ms)
 {
 	// FIXME: there is certainly better way to handle maps inside campaigns
 	if(scenarioId == CampaignScenarioID::NONE)
 		scenarioId = currentMap.value();
 
-	CMapService mapService;
 	std::string scenarioName = getFilename().substr(0, getFilename().find('.'));
 	boost::to_lower(scenarioName);
 	scenarioName += ':' + std::to_string(scenarioId.getNum());
@@ -280,7 +280,7 @@ std::unique_ptr<CMap> CampaignState::getMap(CampaignScenarioID scenarioId, IGame
 		return nullptr;
 
 	const auto & mapContent = mapPieces.find(scenarioId)->second;
-	auto result = mapService.loadMap(mapContent.data(), mapContent.size(), scenarioName, getModName(), getEncoding(), cb);
+	auto result = ms->loadMap(mapContent.data(), mapContent.size(), scenarioName, getModName(), getEncoding());
 
 	mapTranslations[scenarioId] = result->texts;
 	return result;
@@ -324,7 +324,7 @@ JsonNode CampaignState::crossoverSerialize(CGHeroInstance * hero) const
 std::shared_ptr<CGHeroInstance> CampaignState::crossoverDeserialize(const JsonNode & node, CMap * map) const
 {
 	JsonDeserializer handler(nullptr, const_cast<JsonNode&>(node));
-	auto hero = std::make_shared<CGHeroInstance>(map ? map->cb : nullptr);
+	auto hero = std::make_shared<CGHeroInstance>(nullptr);
 	hero->ID = Obj::HERO;
 	hero->serializeJsonOptions(handler);
 	if (map)

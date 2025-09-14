@@ -344,7 +344,7 @@ void CArtifactSet::serializeJsonHero(JsonSerializeFormat & handler, CMap * map)
 	{
 		for(const ArtifactID & artifactID : backpackTemp)
 		{
-			auto * artifact = map->createArtifact(artifactID);
+			auto * artifact = map->createArtifact(artifactID, getCallback());
 			auto slot = ArtifactPosition::BACKPACK_START + artifactsInBackpack.size();
 			if(artifact->getType()->canBePutAt(this, slot))
 			{
@@ -385,7 +385,7 @@ void CArtifactSet::serializeJsonSlot(JsonSerializeFormat & handler, const Artifa
 
 		if(artifactID != ArtifactID::NONE)
 		{
-			auto * artifact = map->createArtifact(artifactID.toEnum());
+			auto * artifact = map->createArtifact(artifactID.toEnum(), getCallback());
 
 			if(artifact->getType()->canBePutAt(this, slot))
 			{

@@ -15,6 +15,7 @@
 #include "../filesystem/CZipSaver.h"
 #include "../filesystem/CZipLoader.h"
 #include "../GameConstants.h"
+#include "../callback/GameCallbackHolder.h"
 
 #include "../serializer/JsonSerializeFormat.h"
 
@@ -33,7 +34,7 @@ class JsonSerializeFormat;
 class JsonDeserializer;
 class JsonSerializer;
 
-class DLL_LINKAGE CMapFormatJson
+class DLL_LINKAGE CMapFormatJson : public GameCallbackHolder
 {
 public:
 	static const int VERSION_MAJOR;
@@ -58,7 +59,7 @@ protected:
 	 */
 	CMapHeader * mapHeader;
 
-	CMapFormatJson();
+	CMapFormatJson(IGameInfoCallback * cb);
 
 	static TerrainId getTerrainByCode(const std::string & code);
 	static RiverId getRiverByCode(const std::string & code);
@@ -134,7 +135,7 @@ public:
 	 *
 	 * @param stream. A stream containing the map data.
 	 */
-	CMapPatcher(const JsonNode & stream);
+	CMapPatcher(const JsonNode & stream, IGameInfoCallback * cb);
 
 public: //IMapPatcher
 	/**
@@ -160,14 +161,14 @@ public:
 	 *
 	 * @param stream a stream containing the map data
 	 */
-	CMapLoaderJson(CInputStream * stream);
+	CMapLoaderJson(CInputStream * stream, IGameInfoCallback * cb);
 
 	/**
 	 * Loads the VCMI/Json map file.
 	 *
 	 * @return a unique ptr of the loaded map class
 	 */
-	std::unique_ptr<CMap> loadMap(IGameInfoCallback * cb) override;
+	std::unique_ptr<CMap> loadMap() override;
 
 	/**
 	 * Loads the VCMI/Json map header.
@@ -236,7 +237,7 @@ public:
 	 *
 	 * @param stream a stream to save the map to, will contain zip archive
 	 */
-	CMapSaverJson(CInputOutputStream * stream);
+	CMapSaverJson(CInputOutputStream * stream, IGameInfoCallback * cb);
 
 	~CMapSaverJson();
 

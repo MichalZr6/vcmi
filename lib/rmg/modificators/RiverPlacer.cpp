@@ -403,7 +403,7 @@ void RiverPlacer::connectRiver(const int3 & tile)
 			{
 				if(templ->animationFile == targetTemplateName)
 				{
-					auto obj = handler->create(map.mapInstance->cb, templ);
+					auto obj = handler->create(map.cb, templ);
 					rmg::Object deltaObj(obj, deltaPositions[pos]);
 					deltaObj.finalize(map, zone.getRand());
 				}

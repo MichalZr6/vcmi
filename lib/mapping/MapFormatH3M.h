@@ -13,6 +13,7 @@
 #include "CMapService.h"
 #include "MapFeaturesH3M.h"
 #include "../constants/EntityIdentifiers.h"
+#include "../lib/callback/GameCallbackHolder.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -66,7 +67,7 @@ enum class ELossConditionType : int8_t
 	TIMEEXPIRES = 2
 };
 
-class DLL_LINKAGE CMapLoaderH3M : public IMapLoader
+class DLL_LINKAGE CMapLoaderH3M : public IMapLoader, public GameCallbackHolder
 {
 public:
 	/**
@@ -74,7 +75,8 @@ public:
 	 *
 	 * @param stream a stream containing the map data
 	 */
-	CMapLoaderH3M(const std::string & mapName, const std::string & modName, const std::string & encodingName, CInputStream * stream);
+	CMapLoaderH3M(const std::string & mapName, const std::string & modName,
+				  const std::string & encodingName, CInputStream * stream, IGameInfoCallback * cb);
 
 	/**
 	 * Destructor.
@@ -86,7 +88,7 @@ public:
 	 *
 	 * @return a unique ptr of the loaded map class
 	 */
-	std::unique_ptr<CMap> loadMap(IGameInfoCallback * cb) override;
+	std::unique_ptr<CMap> loadMap() override;
 
 	/**
 	 * Loads the VCMI/H3 map header.

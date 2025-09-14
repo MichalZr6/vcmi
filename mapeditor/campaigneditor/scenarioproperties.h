@@ -16,6 +16,7 @@
 class CMap;
 class CampaignState;
 class QAbstractButton;
+class IMapService;
 
 namespace Ui {
 class ScenarioProperties;
@@ -28,7 +29,7 @@ class ScenarioProperties : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ScenarioProperties(std::shared_ptr<CampaignState> campaignState, CampaignScenarioID scenario);
+	explicit ScenarioProperties(std::shared_ptr<CampaignState> campaignState, CampaignScenarioID scenario, const IMapService * mapService);
 	~ScenarioProperties();
 
 	static bool showScenarioProperties(std::shared_ptr<CampaignState> campaignState, CampaignScenarioID scenario);

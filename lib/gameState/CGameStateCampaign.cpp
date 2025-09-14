@@ -705,9 +705,9 @@ bool CGameStateCampaign::playerHasStartingHero(PlayerColor playerColor) const
 	return false;
 }
 
-std::unique_ptr<CMap> CGameStateCampaign::getCurrentMap()
+std::unique_ptr<CMap> CGameStateCampaign::getCurrentMap(const IMapService * ms)
 {
-	return gameState->scenarioOps->campState->getMap(CampaignScenarioID::NONE, gameState);
+	return gameState->scenarioOps->campState->getMap(CampaignScenarioID::NONE, ms);
 }
 
 VCMI_LIB_NAMESPACE_END

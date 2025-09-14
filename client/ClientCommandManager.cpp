@@ -223,6 +223,8 @@ void ClientCommandManager::handleTranslateGameCommand(bool onlyMissing)
 void ClientCommandManager::handleTranslateMapsCommand()
 {
 	CMapService mapService;
+	EditorCallback cb(nullptr);
+	mapService.setCallback(&cb);
 
 	printCommandMessage("Searching for available maps");
 	std::unordered_set<ResourcePath> mapList = CResourceHandler::get()->getFilteredFiles([&](const ResourcePath & ident)
@@ -230,7 +232,6 @@ void ClientCommandManager::handleTranslateMapsCommand()
 		return ident.getType() == EResType::MAP;
 	});
 
-	std::vector<std::unique_ptr<CMap>> loadedMaps;
 	std::vector<std::shared_ptr<CampaignState>> loadedCampaigns;
 
 	printCommandMessage("Loading maps for export");
@@ -239,7 +240,7 @@ void ClientCommandManager::handleTranslateMapsCommand()
 		try
 		{
 			// load and drop loaded map - we only need loader to run over all maps
-			loadedMaps.push_back(mapService.loadMap(mapName, nullptr));
+			mapService.loadMap(mapName);
 		}
 		catch(std::exception & e)
 		{
@@ -260,7 +261,9 @@ void ClientCommandManager::handleTranslateMapsCommand()
 		{
 			loadedCampaigns.push_back(CampaignHandler::getCampaign(campaignName.getName()));
 			for (auto const & part : loadedCampaigns.back()->allScenarios())
-				loadedCampaigns.back()->getMap(part, nullptr);
+			{
+				loadedCampaigns.back()->getMap(part, &mapService);
+			}
 		}
 		catch(std::exception & e)
 		{

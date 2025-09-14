@@ -31,14 +31,14 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-
-std::unique_ptr<CMap> CMapService::loadMap(const ResourcePath & name, IGameInfoCallback * cb) const
+std::unique_ptr<CMap> CMapService::loadMap(const ResourcePath & name) const
 {
+	assert(_cb);
 	std::string modName = LIBRARY->modh->findResourceOrigin(name);
 	std::string encoding = LIBRARY->modh->findResourceEncoding(name);
 
 	auto stream = getStreamFromFS(name);
-	return getMapLoader(stream, name.getName(), modName, encoding)->loadMap(cb);
+	return getMapLoader(stream, name.getName(), modName, encoding, _cb)->loadMap();
 }
 
 std::unique_ptr<CMapHeader> CMapService::loadMapHeader(const ResourcePath & name) const
@@ -47,37 +47,42 @@ std::unique_ptr<CMapHeader> CMapService::loadMapHeader(const ResourcePath & name
 	std::string encoding = LIBRARY->modh->findResourceEncoding(name);
 
 	auto stream = getStreamFromFS(name);
-	return getMapLoader(stream, name.getName(), modName, encoding)->loadMapHeader();
+	return getMapLoader(stream, name.getName(), modName, encoding, _cb)->loadMapHeader();
 }
 
-std::unique_ptr<CMap> CMapService::loadMap(const uint8_t * buffer, int size, const std::string & name,  const std::string & modName, const std::string & encoding, IGameInfoCallback * cb) const
+std::unique_ptr<CMap> CMapService::loadMap(const uint8_t * buffer, int size, const std::string & name,  const std::string & modName,
+										   const std::string & encoding) const
 {
+	assert(_cb);
 	auto stream = getStreamFromMem(buffer, size);
-	std::unique_ptr<CMap> map(getMapLoader(stream, name, modName, encoding)->loadMap(cb));
+	std::unique_ptr<CMap> map(getMapLoader(stream, name, modName, encoding, _cb)->loadMap());
 	std::unique_ptr<CMapHeader> header(map.get());
 
 	//might be original campaign and require patch
-	getMapPatcher(name)->patchMapHeader(header);
+	getMapPatcher(name, _cb)->patchMapHeader(header);
 	header.release();
 
 	return map;
 }
 
-std::unique_ptr<CMapHeader> CMapService::loadMapHeader(const uint8_t * buffer, int size, const std::string & name, const std::string & modName, const std::string & encoding) const
+std::unique_ptr<CMapHeader> CMapService::loadMapHeader(const uint8_t * buffer, int size,
+													   const std::string & name, const std::string & modName,
+													   const std::string & encoding) const
 {
 	auto stream = getStreamFromMem(buffer, size);
-	std::unique_ptr<CMapHeader> header = getMapLoader(stream, name, modName, encoding)->loadMapHeader();
+	std::unique_ptr<CMapHeader> header = getMapLoader(stream, name, modName, encoding, _cb)->loadMapHeader();
 
 	//might be original campaign and require patch
-	getMapPatcher(name)->patchMapHeader(header);
+	getMapPatcher(name, _cb)->patchMapHeader(header);
 	return header;
 }
 
 void CMapService::saveMap(const std::unique_ptr<CMap> & map, boost::filesystem::path fullPath) const
 {
+	assert(_cb);
 	CMemoryBuffer serializeBuffer;
 	{
-		CMapSaverJson saver(&serializeBuffer);
+		CMapSaverJson saver(&serializeBuffer, _cb);
 		saver.saveMap(map);
 	}
 	{
@@ -88,6 +93,16 @@ void CMapService::saveMap(const std::unique_ptr<CMap> & map, boost::filesystem::
 		tmp.flush();
 		tmp.close();
 	}
+}
+
+void CMapService::setCallback(IGameInfoCallback * cb)
+{
+	_cb = cb;
+}
+
+IGameInfoCallback * CMapService::getCallback()
+{
+	return _cb;
 }
 
 ModCompatibilityInfo CMapService::verifyMapHeaderMods(const CMapHeader & map)
@@ -128,7 +143,9 @@ std::unique_ptr<CInputStream> CMapService::getStreamFromMem(const uint8_t * buff
 	return std::unique_ptr<CInputStream>(new CMemoryStream(buffer, size));
 }
 
-std::unique_ptr<IMapLoader> CMapService::getMapLoader(std::unique_ptr<CInputStream> & stream, std::string mapName, std::string modName, std::string encoding)
+std::unique_ptr<IMapLoader> CMapService::getMapLoader(std::unique_ptr<CInputStream> & stream,
+													  std::string mapName, std::string modName,
+													  std::string encoding, IGameInfoCallback * cb)
 {
 	// Read map header
 	CBinaryReader reader(stream.get());
@@ -141,7 +158,7 @@ std::unique_ptr<IMapLoader> CMapService::getMapLoader(std::unique_ptr<CInputStre
 	case 0x06054b50:
 	case 0x04034b50:
 	case 0x02014b50:
-		return std::unique_ptr<IMapLoader>(new CMapLoaderJson(stream.get()));
+		return std::unique_ptr<IMapLoader>(new CMapLoaderJson(stream.get(), cb));
 		break;
 	default:
 		// Check which map format is used
@@ -151,25 +168,25 @@ std::unique_ptr<IMapLoader> CMapService::getMapLoader(std::unique_ptr<CInputStre
 			// gzip header magic number, reversed for LE
 			case 0x00088B1F:
 				stream = std::unique_ptr<CInputStream>(new CCompressedStream(std::move(stream), true));
-				return std::unique_ptr<IMapLoader>(new CMapLoaderH3M(mapName, modName, encoding, stream.get()));
+				return std::unique_ptr<IMapLoader>(new CMapLoaderH3M(mapName, modName, encoding, stream.get(), cb));
 			case static_cast<int>(EMapFormat::WOG) :
 			case static_cast<int>(EMapFormat::AB)  :
 			case static_cast<int>(EMapFormat::ROE) :
 			case static_cast<int>(EMapFormat::SOD) :
 			case static_cast<int>(EMapFormat::CHR) :
 			case static_cast<int>(EMapFormat::HOTA) :
-				return std::unique_ptr<IMapLoader>(new CMapLoaderH3M(mapName, modName, encoding, stream.get()));
+				return std::unique_ptr<IMapLoader>(new CMapLoaderH3M(mapName, modName, encoding, stream.get(), cb));
 			default :
 				throw std::runtime_error("Unknown map format");
 		}
 	}
 }
 
-std::unique_ptr<IMapPatcher> CMapService::getMapPatcher(std::string scenarioName)
+std::unique_ptr<IMapPatcher> CMapService::getMapPatcher(std::string scenarioName, IGameInfoCallback * cb)
 {
 	boost::to_lower(scenarioName);
 	logGlobal->debug("Request to patch map %s", scenarioName);
-	return std::make_unique<CMapPatcher>(LIBRARY->mapFormat->mapOverrides(scenarioName));
+	return std::make_unique<CMapPatcher>(LIBRARY->mapFormat->mapOverrides(scenarioName), cb);
 }
 
 VCMI_LIB_NAMESPACE_END

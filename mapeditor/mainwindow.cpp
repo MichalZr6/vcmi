@@ -642,7 +642,9 @@ void MainWindow::saveMap()
 		}
 	}
 
+
 	CMapService mapService;
+	mapService.setCallback(controller.getCallback());
 	try
 	{
 		mapService.saveMap(controller.getMapUniquePtr(), filename.toStdString());
@@ -1440,12 +1442,13 @@ void MainWindow::on_actionh3m_converter_triggered()
 	
 	try
 	{
+		auto cb = controller.getCallback();
+		CMapService mapService;
+		mapService.setCallback(cb);
 		for(auto & m : mapFiles)
 		{
-			CMapService mapService;
-			auto map = Helper::openMapInternal(m, controller.getCallback());
-			controller.setCallback(std::make_unique<EditorCallback>(map.get()));
-			controller.repairMap(map.get());
+			auto map = Helper::openMapInternal(m, cb);
+			MapController::repairMap(map.get(), cb);
 			mapService.saveMap(map, (saveDirectory + '/' + QFileInfo(m).completeBaseName() + ".vmap").toStdString());
 		}
 		QMessageBox::information(this, tr("Operation completed"), tr("Successfully converted %1 maps").arg(mapFiles.size()));

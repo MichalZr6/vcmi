@@ -384,9 +384,9 @@ bool EditorObstaclePlacer::isInTheMap(const int3& tile)
 	return map->isInTheMap(tile);
 }
 
-std::set<std::shared_ptr<CGObjectInstance>> EditorObstaclePlacer::placeObstacles(vstd::RNG & rand)
+std::set<std::shared_ptr<CGObjectInstance>> EditorObstaclePlacer::placeObstacles(vstd::RNG & rand, IGameInfoCallback * cb)
 {
-	auto obstacles = createObstacles(rand, map->cb);
+	auto obstacles = createObstacles(rand, cb);
 	finalInsertion(map->getEditManager(), obstacles);
 	return obstacles;
 }

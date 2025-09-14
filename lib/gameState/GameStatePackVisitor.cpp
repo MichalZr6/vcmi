@@ -950,7 +950,7 @@ void GameStatePackVisitor::visitAssembledArtifact(AssembledArtifact & pack)
 		return art->getId() == builtArt->getId();
 	}));
 
-	auto * combinedArt = gs.getMap().createArtifactComponent(pack.artId);
+	auto * combinedArt = gs.getMap().createArtifactComponent(pack.artId, &gs);
 
 	// Find slots for all involved artifacts
 	std::set<ArtifactPosition, std::greater<>> slotsInvolved = { pack.al.slot };

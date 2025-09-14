@@ -172,9 +172,8 @@ EDiggingStatus TerrainTile::getDiggingStatus(const bool excludeTop) const
 		return EDiggingStatus::CAN_DIG;
 }
 
-CMap::CMap(IGameInfoCallback * cb)
-	: GameCallbackHolder(cb)
-	, grailPos(-1, -1, -1)
+CMap::CMap()
+	: grailPos(-1, -1, -1)
 	, grailRadius(0)
 	, waterMap(false)
 	, uidCounter(0)
@@ -819,12 +818,12 @@ void CMap::overrideGameSettings(const JsonNode & input)
 	return gameSettings->loadOverrides(input);
 }
 
-CArtifactInstance * CMap::createScroll(const SpellID & spellId)
+CArtifactInstance * CMap::createScroll(const SpellID & spellId, IGameInfoCallback * cb)
 {
-	return createArtifact(ArtifactID::SPELL_SCROLL, spellId);
+	return createArtifact(ArtifactID::SPELL_SCROLL, cb, spellId);
 }
 
-CArtifactInstance * CMap::createArtifactComponent(const ArtifactID & artId)
+CArtifactInstance * CMap::createArtifactComponent(const ArtifactID & artId, IGameInfoCallback * cb)
 {
 	auto newArtifact = artId.hasValue() ?
 		std::make_shared<CArtifactInstance>(cb, artId.toArtifact()):
@@ -835,18 +834,18 @@ CArtifactInstance * CMap::createArtifactComponent(const ArtifactID & artId)
 	return newArtifact.get();
 }
 
-CArtifactInstance * CMap::createArtifact(const ArtifactID & artID, const SpellID & spellId)
+CArtifactInstance * CMap::createArtifact(const ArtifactID & artID, IGameInfoCallback * cb, const SpellID & spellId)
 {
 	if(!artID.hasValue())
 		throw std::runtime_error("Can't create empty artifact!");
 
 	auto art = artID.toArtifact();
 
-	auto artInst = createArtifactComponent(artID);
+	auto artInst = createArtifactComponent(artID, cb);
 	if(art->isCombined() && !art->isFused())
 	{
 		for(const auto & part : art->getConstituents())
-			artInst->addPart(createArtifact(part->getId(), spellId), ArtifactPosition::PRE_FIRST);
+			artInst->addPart(createArtifact(part->getId(), cb, spellId), ArtifactPosition::PRE_FIRST);
 	}
 	if(art->isGrowing())
 	{
@@ -944,7 +943,7 @@ const CGObjectInstance * CMap::getObject(ObjectInstanceID obj) const
 	return objects.at(obj).get();
 }
 
-void CMap::saveCompatibilityStoreAllocatedArtifactID()
+void CMap::saveCompatibilityStoreAllocatedArtifactID(IGameInfoCallback * cb)
 {
 	if (!artInstances.empty())
 		cb->gameState().saveCompatibilityLastAllocatedArtifactID = artInstances.back()->getId();

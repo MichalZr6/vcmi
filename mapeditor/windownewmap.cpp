@@ -207,7 +207,7 @@ void generateRandomMap(CMapGenerator & gen, MainWindow * window)
 
 std::unique_ptr<CMap> generateEmptyMap(CMapGenOptions & options)
 {
-	auto map = std::make_unique<CMap>(nullptr);
+	auto map = std::make_unique<CMap>();
 	map->version = EMapFormat::VCMI;
 	map->creationDateTime = std::time(nullptr);
 	map->width = options.getWidth();

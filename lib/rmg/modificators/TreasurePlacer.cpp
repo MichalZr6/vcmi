@@ -139,7 +139,7 @@ void TreasurePlacer::setBasicProperties(ObjectInfo & oi, CompoundMapObjectID obj
 {
 	oi.generateObject = [this, objid]() -> std::shared_ptr<CGObjectInstance>
 	{
-		return LIBRARY->objtypeh->getHandlerFor(objid)->create(map.mapInstance->cb, nullptr);
+		return LIBRARY->objtypeh->getHandlerFor(objid)->create(map.cb, nullptr);
 	};
 	oi.setTemplates(objid.primaryID, objid.secondaryID, zone.getTerrainType());
 }
@@ -179,7 +179,7 @@ void TreasurePlacer::addPrisons()
 			{
 				HeroTypeID hid = prisonHeroPlacer->drawRandomHero();
 				auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PRISON, 0);
-				auto obj = std::dynamic_pointer_cast<CGHeroInstance>(factory->create(map.mapInstance->cb, nullptr));
+				auto obj = std::dynamic_pointer_cast<CGHeroInstance>(factory->create(map.cb, nullptr));
 
 				obj->setHeroType(hid); //will be initialized later
 				obj->exp = generator.getConfig().prisonExperience[i];
@@ -246,7 +246,7 @@ void TreasurePlacer::addDwellings()
 				
 				oi.generateObject = [this, secondaryID, dwellingType]() -> std::shared_ptr<CGObjectInstance>
 				{
-					auto obj = LIBRARY->objtypeh->getHandlerFor(dwellingType, secondaryID)->create(map.mapInstance->cb, nullptr);
+					auto obj = LIBRARY->objtypeh->getHandlerFor(dwellingType, secondaryID)->create(map.cb, nullptr);
 					obj->tempOwner = PlayerColor::NEUTRAL;
 					return obj;
 				};
@@ -269,7 +269,7 @@ void TreasurePlacer::addScrolls()
 		oi.generateObject = [i, this]() -> std::shared_ptr<CGObjectInstance>
 		{
 			auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::SPELL_SCROLL, 0);
-			auto obj = std::dynamic_pointer_cast<CGArtifact>(factory->create(map.mapInstance->cb, nullptr));
+			auto obj = std::dynamic_pointer_cast<CGArtifact>(factory->create(map.cb, nullptr));
 			std::vector<SpellID> out;
 			
 			for(auto spellID : LIBRARY->spellh->getDefaultAllowed())
@@ -277,7 +277,7 @@ void TreasurePlacer::addScrolls()
 				if(map.isAllowedSpell(spellID) && spellID.toSpell()->getLevel() == i + 1)
 					out.push_back(spellID);
 			}
-			auto * a = map.mapInstance->createScroll(*RandomGeneratorUtil::nextItem(out, zone.getRand()));
+			auto * a = map.mapInstance->createScroll(*RandomGeneratorUtil::nextItem(out, zone.getRand()), map.cb);
 			obj->setArtifactInstance(a);
 			return obj;
 		};
@@ -309,7 +309,7 @@ void TreasurePlacer::addPandoraBoxesWithGold()
 		oi.generateObject = [this, i]() -> std::shared_ptr<CGObjectInstance>
 		{
 			auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PANDORAS_BOX, 0);
-			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.mapInstance->cb, nullptr));
+			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.cb, nullptr));
 			
 			Rewardable::VisitInfo reward;
 			reward.reward.resources[EGameResID::GOLD] = i * 5000;
@@ -334,7 +334,7 @@ void TreasurePlacer::addPandoraBoxesWithExperience()
 		oi.generateObject = [this, i]() -> std::shared_ptr<CGObjectInstance>
 		{
 			auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PANDORAS_BOX, 0);
-			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.mapInstance->cb, nullptr));
+			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.cb, nullptr));
 			
 			Rewardable::VisitInfo reward;
 			reward.reward.heroExperience = i * 5000;
@@ -364,7 +364,7 @@ void TreasurePlacer::addPandoraBoxesWithCreatures()
 		oi.generateObject = [this, creature, creaturesAmount]() -> std::shared_ptr<CGObjectInstance>
 		{
 			auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PANDORAS_BOX, 0);
-			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.mapInstance->cb, nullptr));
+			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.cb, nullptr));
 			
 			Rewardable::VisitInfo reward;
 			reward.reward.creatures.emplace_back(creature, creaturesAmount);
@@ -390,7 +390,7 @@ void TreasurePlacer::addPandoraBoxesWithSpells()
 		oi.generateObject = [i, this]() -> std::shared_ptr<CGObjectInstance>
 		{
 			auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PANDORAS_BOX, 0);
-			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.mapInstance->cb, nullptr));
+			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.cb, nullptr));
 
 			std::vector <const CSpell *> spells;
 			for(auto spellID : LIBRARY->spellh->getDefaultAllowed())
@@ -423,7 +423,7 @@ void TreasurePlacer::addPandoraBoxesWithSpells()
 		oi.generateObject = [i, this]() -> std::shared_ptr<CGObjectInstance>
 		{
 			auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PANDORAS_BOX, 0);
-			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.mapInstance->cb, nullptr));
+			auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.cb, nullptr));
 
 			std::vector <const CSpell *> spells;
 			for(auto spellID : LIBRARY->spellh->getDefaultAllowed())
@@ -455,7 +455,7 @@ void TreasurePlacer::addPandoraBoxesWithSpells()
 	oi.generateObject = [this]() -> std::shared_ptr<CGObjectInstance>
 	{
 		auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::PANDORAS_BOX, 0);
-		auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.mapInstance->cb, nullptr));
+		auto obj = std::dynamic_pointer_cast<CGPandoraBox>(factory->create(map.cb, nullptr));
 
 		std::vector <const CSpell *> spells;
 		for(auto spellID : LIBRARY->spellh->getDefaultAllowed())
@@ -537,7 +537,7 @@ void TreasurePlacer::addSeerHuts()
 			int randomAppearance = chooseRandomAppearance(zone.getRand(), Obj::SEER_HUT, zone.getTerrainType());
 			
 			// FIXME: Remove duplicated code for gold, exp and creaure reward
-			oi.generateObject = [cb=map.mapInstance->cb, creature, creaturesAmount, randomAppearance, setRandomArtifact]() -> std::shared_ptr<CGObjectInstance>
+			oi.generateObject = [cb=map.cb, creature, creaturesAmount, randomAppearance, setRandomArtifact]() -> std::shared_ptr<CGObjectInstance>
 			{
 				auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::SEER_HUT, randomAppearance);
 				auto obj = std::dynamic_pointer_cast<CGSeerHut>(factory->create(cb, nullptr));
@@ -584,7 +584,7 @@ void TreasurePlacer::addSeerHuts()
 			oi.generateObject = [i, randomAppearance, this, setRandomArtifact]() -> std::shared_ptr<CGObjectInstance>
 			{
 				auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::SEER_HUT, randomAppearance);
-				auto obj = std::dynamic_pointer_cast<CGSeerHut>(factory->create(map.mapInstance->cb, nullptr));
+				auto obj = std::dynamic_pointer_cast<CGSeerHut>(factory->create(map.cb, nullptr));
 				
 				Rewardable::VisitInfo reward;
 				reward.reward.heroExperience = generator.getConfig().questRewardValues[i];
@@ -602,7 +602,7 @@ void TreasurePlacer::addSeerHuts()
 			oi.generateObject = [i, randomAppearance, this, setRandomArtifact]() -> std::shared_ptr<CGObjectInstance>
 			{
 				auto factory = LIBRARY->objtypeh->getHandlerFor(Obj::SEER_HUT, randomAppearance);
-				auto obj = std::dynamic_pointer_cast<CGSeerHut>(factory->create(map.mapInstance->cb, nullptr));
+				auto obj = std::dynamic_pointer_cast<CGSeerHut>(factory->create(map.cb, nullptr));
 				
 				Rewardable::VisitInfo reward;
 				reward.reward.resources[EGameResID::GOLD] = generator.getConfig().questRewardValues[i];

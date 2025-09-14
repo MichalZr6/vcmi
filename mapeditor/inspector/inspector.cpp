@@ -205,12 +205,13 @@ void Initializer::initialize(CGArtifact * o)
 				out.push_back(spell->id);
 			}
 		}
-		auto a = controller.map()->createScroll(*RandomGeneratorUtil::nextItem(out, CRandomGenerator::getDefault()));
+		auto a = controller.map()->createScroll(*RandomGeneratorUtil::nextItem(out, CRandomGenerator::getDefault()),
+												controller.getCallback());
 		o->setArtifactInstance(a);
 	}
 	else if(o->ID == Obj::ARTIFACT || (o->ID >= Obj::RANDOM_ART && o->ID <= Obj::RANDOM_RELIC_ART))
 	{
-		auto instance = controller.map()->createArtifact(o->getArtifactType());
+		auto instance = controller.map()->createArtifact(o->getArtifactType(), controller.getCallback());
 		o->setArtifactInstance(instance);
 	}
 	else
@@ -653,7 +654,7 @@ void Inspector::setProperty(CGArtifact * o, const QString & key, const QVariant 
 	
 	if(key == QObject::tr("Spell"))
 	{
-		o->setArtifactInstance(controller.map()->createScroll(SpellID(value.toInt())));
+		o->setArtifactInstance(controller.map()->createScroll(SpellID(value.toInt()), controller.getCallback()));
 	}
 }
 

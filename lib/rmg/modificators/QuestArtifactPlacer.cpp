@@ -118,7 +118,7 @@ void QuestArtifactPlacer::placeQuestArtifacts(vstd::RNG & rand)
 
 			//Update appearance. Terrain is irrelevant.
 			auto handler = LIBRARY->objtypeh->getHandlerFor(Obj::ARTIFACT, artifactToPlace);
-			auto newObj = handler->create(map.mapInstance->cb, nullptr);
+			auto newObj = handler->create(map.cb, nullptr);
 			auto templates = handler->getTemplates();
 			//artifactToReplace->appearance = templates.front();
 			newObj->appearance  = templates.front();

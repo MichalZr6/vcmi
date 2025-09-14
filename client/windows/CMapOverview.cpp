@@ -102,11 +102,12 @@ std::vector<std::shared_ptr<CanvasImage>> CMapOverviewWidget::createMinimaps(con
 	std::vector<std::shared_ptr<CanvasImage>> ret;
 
 	CMapService mapService;
+	EditorCallback cb(nullptr);
+	mapService.setCallback(&cb);
 	std::unique_ptr<CMap> map;
 	try
 	{
-		auto cb = std::make_unique<EditorCallback>(map.get());
-		map = mapService.loadMap(resource, cb.get());
+		map = mapService.loadMap(resource);
 	}
 	catch (const std::exception & e)
 	{
@@ -169,7 +170,12 @@ CMapOverviewWidget::CMapOverviewWidget(CMapOverview& parent):
 			lf.load(startInfo);
 
 			if(startInfo.campState)
-				campaignMap = startInfo.campState->getMap(*startInfo.campState->currentScenario(), nullptr);
+			{
+				CMapService mapService;
+				EditorCallback cb(nullptr);
+				mapService.setCallback(&cb);
+				campaignMap = startInfo.campState->getMap(*startInfo.campState->currentScenario(), &mapService);
+			}
 			res = ResourcePath(startInfo.fileURI, EResType::MAP);
 		}
 		if(!campaignMap)
