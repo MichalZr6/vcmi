@@ -262,12 +262,7 @@ int3 CGameInfoCallback::guardingCreaturePosition (int3 pos) const
 std::vector<const CGObjectInstance*> CGameInfoCallback::getGuardingCreatures (int3 pos) const
 {
 	ERROR_RET_VAL_IF(!isVisible(pos), "Tile is not visible!", std::vector<const CGObjectInstance*>());
-	std::vector<const CGObjectInstance*> ret;
-	for(auto * cr : gameState().guardingCreatures(pos))
-	{
-		ret.push_back(cr);
-	}
-	return ret;
+	return gameState().guardingCreatures(pos);
 }
 
 bool CGameInfoCallback::isTileGuardedUnchecked(int3 tile) const
