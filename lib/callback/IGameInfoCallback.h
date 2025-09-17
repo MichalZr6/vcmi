@@ -39,6 +39,7 @@ class CArmedInstance;
 class CGTeleport;
 class CGTownInstance;
 class IMarket;
+class CMap;
 
 using FowTilesType = std::set<int3>;
 
@@ -76,6 +77,10 @@ public:
 	/// MONTH - current month (1..inf)
 	/// DAY_OF_MONTH - number of day within current month, (1..28)
 	virtual int getDate(Date mode=Date::DAY) const = 0;
+
+	/// Provide access to CMap API
+	virtual CMap & map() = 0;
+	virtual const CMap & map() const = 0;
 
 	/// Return pointer to static map header for current map
 	virtual const CMapHeader * getMapHeader() const = 0;

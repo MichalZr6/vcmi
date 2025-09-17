@@ -31,7 +31,7 @@ const CGObjectInstance * IMapInfoCallback::getObj(ObjectInstanceID objid, bool v
 		return nullptr;
 	}
 
-	const CGObjectInstance * ret = getMapConstPtr()->getObject(objid);
+	const CGObjectInstance * ret = map().getObject(objid);
 	if(!ret && verbose)
 	{
 		logGlobal->error("Cannot get object with id %d. Object was removed", objid.getNum());
@@ -67,42 +67,42 @@ PlayerColor IMapInfoCallback::getOwner(ObjectInstanceID heroID) const
 
 const CArtifactInstance * IMapInfoCallback::getArtInstance(ArtifactInstanceID aid) const
 {
-	return getMapConstPtr()->getArtifactInstance(aid);
+	return map().getArtifactInstance(aid);
 }
 
 const CGObjectInstance * IMapInfoCallback::getObjInstance(ObjectInstanceID oid) const
 {
-	return getMapConstPtr()->getObject((oid));
+	return map().getObject((oid));
 }
 
 bool IMapInfoCallback::isInTheMap(const int3 & pos) const
 {
-	return getMapConstPtr()->isInTheMap(pos);
+	return map().isInTheMap(pos);
 }
 
 bool IMapInfoCallback::isAllowed(SpellID id) const
 {
-	return getMapConstPtr()->allowedSpells.count(id) != 0;
+	return map().allowedSpells.count(id) != 0;
 }
 
 bool IMapInfoCallback::isAllowed(ArtifactID id) const
 {
-	return getMapConstPtr()->allowedArtifact.count(id) != 0;
+	return map().allowedArtifact.count(id) != 0;
 }
 
 bool IMapInfoCallback::isAllowed(SecondarySkill id) const
 {
-	return getMapConstPtr()->allowedAbilities.count(id) != 0;
+	return map().allowedAbilities.count(id) != 0;
 }
 
 int3 IMapInfoCallback::getMapSize() const
 {
-	return int3(getMapConstPtr()->width, getMapConstPtr()->height, getMapConstPtr()->levels());
+	return int3(map().width, map().height, map().levels());
 }
 
 void IMapInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::optional<ui16> level)
 {
-	for (auto const & spellID : getMapConstPtr()->allowedSpells)
+	for (auto const & spellID : map().allowedSpells)
 	{
 		const auto * spell = spellID.toEntity(LIBRARY);
 
@@ -118,12 +118,12 @@ void IMapInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::optiona
 
 const IGameSettings & IMapInfoCallback::getSettings() const
 {
-	return getMapConstPtr()->getSettings();
+	return map().getSettings();
 }
 
-const CMapHeader * IMapInfoCallback::getMapHeader() const
+const CMapHeader *IMapInfoCallback::getMapHeader() const
 {
-	return getMapConstPtr();
+	return &map();
 }
 
 VCMI_LIB_NAMESPACE_END

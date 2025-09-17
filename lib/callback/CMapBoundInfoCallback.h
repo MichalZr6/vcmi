@@ -13,24 +13,28 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-class DLL_LINKAGE CMapBoundInfoCallback : public IMapInfoCallback
+class CMap;
+
+class DLL_LINKAGE CMapBoundInfoCallback final : public IMapInfoCallback
 {
 
 public:
-	explicit CMapBoundInfoCallback(const CMap * map);
+	explicit CMapBoundInfoCallback(CMap * cb);
 
-	void setMap(const CMap * map);
-	const CMap * getMapConstPtr() const override;
+	void setMap(CMap * map);
 
-	// Access to full game state — not available in editor
+	CMap & map() override;
+	const CMap & map() const override;
+
+	const TerrainTile * getTile(int3 tile, bool verbose) const override;
+
+	// Access to full game state — not available
 	CGameState & gameState() override;
 	const CGameState & gameState() const override;
 
-	// Unused in editor — return null or dummy
+	// Unused — return null or dummy
 	const StartInfo * getStartInfo() const override;
 	int getDate(Date mode) const override;
-
-	const TerrainTile * getTile(int3 tile, bool verbose) const override;
 	const TerrainTile * getTileUnchecked(int3 tile) const override;
 	bool isTileGuardedUnchecked(int3 tile) const override;
 	const CGObjectInstance * getTopObj(int3 pos) const override;
@@ -39,10 +43,8 @@ public:
 	int3 guardingCreaturePosition(int3 pos) const override;
 	bool checkForVisitableDir(const int3 & src, const int3 & dst) const override;
 	std::vector<const CGObjectInstance*> getGuardingCreatures(int3 pos) const override;
-
 	void getTilesInRange(FowTilesType & tiles, const int3 & pos, int radius, ETileVisibility mode, std::optional<PlayerColor> player, int3::EDistanceFormula formula) const override;
 	void getAllTiles(FowTilesType &tiles, std::optional<PlayerColor> player, int level, const std::function<bool(const TerrainTile *)> & filter) const override;
-
 	std::vector<ObjectInstanceID> getVisibleTeleportObjects(std::vector<ObjectInstanceID> ids, PlayerColor player) const override;
 	std::vector<ObjectInstanceID> getTeleportChannelEntrances(TeleportChannelID id, PlayerColor player) const override;
 	std::vector<ObjectInstanceID> getTeleportChannelExits(TeleportChannelID id, PlayerColor player) const override;
@@ -50,7 +52,6 @@ public:
 	bool isTeleportChannelBidirectional(TeleportChannelID id, PlayerColor player) const override;
 	bool isTeleportChannelUnidirectional(TeleportChannelID id, PlayerColor player) const override;
 	bool isTeleportEntrancePassable(const CGTeleport * obj, PlayerColor player) const override;
-
 	bool isVisibleFor(int3 pos, PlayerColor player) const override;
 	bool isVisibleFor(const CGObjectInstance * obj, PlayerColor player) const override;
 
@@ -72,7 +73,7 @@ public:
 	virtual ~CMapBoundInfoCallback() = default;
 
 private:
-	const CMap * map;
+	CMap * boundMap;
 };
 
 VCMI_LIB_NAMESPACE_END

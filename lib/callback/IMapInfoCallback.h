@@ -13,13 +13,8 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-class CMap;
-
 class DLL_LINKAGE IMapInfoCallback : public IGameInfoCallback
 {
-protected:
-	virtual const CMap * getMapConstPtr() const = 0;
-
 public:
 	virtual ~IMapInfoCallback();
 

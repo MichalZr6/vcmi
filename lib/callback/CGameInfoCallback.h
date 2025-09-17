@@ -19,8 +19,6 @@ class Player;
 class DLL_LINKAGE CGameInfoCallback : public IMapInfoCallback
 {
 protected:
-	const CMap * getMapConstPtr() const override;
-
 	bool hasAccess(std::optional<PlayerColor> playerId) const;
 
 	bool canGetFullInfo(const CGObjectInstance *obj) const; //true we player owns obj or ally owns obj or privileged mode
@@ -44,6 +42,8 @@ public:
 	TurnTimerInfo getPlayerTurnTime(PlayerColor color) const;
 
 	//map
+	CMap & map() override;
+	const CMap & map() const override;
 	bool isVisibleFor(int3 pos, PlayerColor player) const override;
 	bool isVisibleFor(const CGObjectInstance * obj, PlayerColor player) const override;
 	bool isVisible(const CGObjectInstance * obj) const;

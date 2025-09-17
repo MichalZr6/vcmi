@@ -38,7 +38,8 @@ std::unique_ptr<CMap> CMapService::loadMap(const ResourcePath & name) const
 	std::string encoding = LIBRARY->modh->findResourceEncoding(name);
 
 	auto stream = getStreamFromFS(name);
-	return getMapLoader(stream, name.getName(), modName, encoding, _cb)->loadMap();
+	auto loader = getMapLoader(stream, name.getName(), modName, encoding, _cb);
+	return loader->loadMap();
 }
 
 std::unique_ptr<CMapHeader> CMapService::loadMapHeader(const ResourcePath & name) const

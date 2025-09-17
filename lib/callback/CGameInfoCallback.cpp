@@ -107,6 +107,16 @@ TurnTimerInfo CGameInfoCallback::getPlayerTurnTime(PlayerColor color) const
 	return TurnTimerInfo{};
 }
 
+CMap & CGameInfoCallback::map()
+{
+	return gameState().getMap();
+}
+
+const CMap & CGameInfoCallback::map() const
+{
+	return gameState().getMap();
+}
+
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
@@ -246,7 +256,7 @@ bool CGameInfoCallback::getTownInfo(const CGObjectInstance * town, InfoAboutTown
 int3 CGameInfoCallback::guardingCreaturePosition (int3 pos) const
 {
 	ERROR_RET_VAL_IF(!isVisible(pos), "Tile is not visible!", int3(-1,-1,-1));
-	return gameState().getMap().guardingCreaturePositions[pos.z][pos.x][pos.y];
+	return map().guardingCreaturePositions[pos.z][pos.x][pos.y];
 }
 
 std::vector<const CGObjectInstance*> CGameInfoCallback::getGuardingCreatures (int3 pos) const
@@ -442,7 +452,7 @@ std::vector <const CGObjectInstance *> CGameInfoCallback::getVisitableObjs(int3 
 std::vector<const CGObjectInstance *> CGameInfoCallback::getAllVisitableObjs() const
 {
 	std::vector<const CGObjectInstance *> ret;
-	for(auto & obj : gameState().getMap().getObjects())
+	for(auto & obj : map().getObjects())
 		if(obj->isVisitable() && obj->ID != Obj::EVENT && isVisible(obj))
 			ret.push_back(obj);
 
@@ -484,7 +494,7 @@ std::vector<const CGHeroInstance *> CGameInfoCallback::getAvailableHeroes(const 
 const TerrainTile * CGameInfoCallback::getTile(int3 tile, bool verbose) const
 {
 	if(isVisible(tile))
-		return &gameState().getMap().getTile(tile);
+		return &map().getTile(tile);
 
 	if(verbose)
 		logGlobal->error("\r\n%s: %s\r\n", BOOST_CURRENT_FUNCTION, tile.toString() + " is not visible!");
@@ -494,7 +504,7 @@ const TerrainTile * CGameInfoCallback::getTile(int3 tile, bool verbose) const
 const TerrainTile * CGameInfoCallback::getTileUnchecked(int3 tile) const
 {
 	if (isInTheMap(tile))
-		return &gameState().getMap().getTile(tile);
+		return &map().getTile(tile);
 
 	return nullptr;
 }
@@ -504,7 +514,7 @@ EDiggingStatus CGameInfoCallback::getTileDigStatus(int3 tile, bool verbose) cons
 	if(!isVisible(tile))
 		return EDiggingStatus::UNKNOWN;
 
-	for(const auto & object : gameState().getMap().getObjects())
+	for(const auto & object : map().getObjects())
 	{
 		if(object->ID == Obj::HOLE && object->anchorPos() == tile)
 			return EDiggingStatus::TILE_OCCUPIED;
@@ -581,11 +591,6 @@ EBuildingState CGameInfoCallback::canBuildStructure( const CGTownInstance *t, Bu
 	return EBuildingState::ALLOWED;
 }
 
-const CMap * CGameInfoCallback::getMapConstPtr() const
-{
-	return &gameState().getMap();
-}
-
 bool CGameInfoCallback::hasAccess(std::optional<PlayerColor> playerId) const
 {
 	return !getPlayerID() || getPlayerID()->isSpectator() || getPlayerRelations(*playerId, *getPlayerID()) != PlayerRelations::ENEMIES;
@@ -620,7 +625,7 @@ std::string CGameInfoCallback::getTavernRumor(const CGObjectInstance * townOrTav
 
 		break;
 	case RumorState::TYPE_MAP:
-		text.replaceRawString(gameState().getMap().rumors[rumor.first].text.toString());
+		text.replaceRawString(map().rumors[rumor.first].text.toString());
 		break;
 
 	case RumorState::TYPE_RAND:
@@ -744,12 +749,12 @@ std::vector<ObjectInstanceID> CGameInfoCallback::getVisibleTeleportObjects(std::
 
 std::vector<ObjectInstanceID> CGameInfoCallback::getTeleportChannelEntrances(TeleportChannelID id, PlayerColor player) const
 {
-	return getVisibleTeleportObjects(gameState().getMap().teleportChannels.at(id)->entrances, player);
+	return getVisibleTeleportObjects(map().teleportChannels.at(id)->entrances, player);
 }
 
 std::vector<ObjectInstanceID> CGameInfoCallback::getTeleportChannelExits(TeleportChannelID id, PlayerColor player) const
 {
-	return getVisibleTeleportObjects(gameState().getMap().teleportChannels.at(id)->exits, player);
+	return getVisibleTeleportObjects(map().teleportChannels.at(id)->exits, player);
 }
 
 ETeleportChannelType CGameInfoCallback::getTeleportChannelType(TeleportChannelID id, PlayerColor player) const
@@ -794,17 +799,17 @@ bool CGameInfoCallback::isTeleportEntrancePassable(const CGTeleport * obj, Playe
 void CGameInfoCallback::getFreeTiles(std::vector<int3> & tiles, bool skipIfNearbyGuarded) const
 {
 	std::vector<int> floors;
-	floors.reserve(gameState().getMap().levels());
-	for(int b = 0; b < gameState().getMap().levels(); ++b)
+	floors.reserve(map().levels());
+	for(int b = 0; b < map().levels(); ++b)
 	{
 		floors.push_back(b);
 	}
 	const TerrainTile * tinfo = nullptr;
 	for (auto zd : floors)
 	{
-		for (int xd = 0; xd < gameState().getMap().width; xd++)
+		for (int xd = 0; xd < map().width; xd++)
 		{
-			for (int yd = 0; yd < gameState().getMap().height; yd++)
+			for (int yd = 0; yd < map().height; yd++)
 			{
 				tinfo = getTile(int3 (xd,yd,zd));
 				if (tinfo->isLand() && tinfo->getTerrain()->isPassable() && !tinfo->blocked()) //land and free
@@ -845,9 +850,9 @@ void CGameInfoCallback::getTilesInRange(FowTilesType & tiles,
 	else
 	{
 		const TeamState * team = !player ? nullptr : gameState().getPlayerTeam(*player);
-		for (int xd = std::max<int>(pos.x - radious , 0); xd <= std::min<int>(pos.x + radious, gameState().getMap().width - 1); xd++)
+		for (int xd = std::max<int>(pos.x - radious , 0); xd <= std::min<int>(pos.x + radious, map().width - 1); xd++)
 		{
-			for (int yd = std::max<int>(pos.y - radious, 0); yd <= std::min<int>(pos.y + radious, gameState().getMap().height - 1); yd++)
+			for (int yd = std::max<int>(pos.y - radious, 0); yd <= std::min<int>(pos.y + radious, map().height - 1); yd++)
 			{
 				int3 tilePos(xd,yd,pos.z);
 				int distance = pos.dist(tilePos, distanceFormula);
@@ -876,7 +881,7 @@ void CGameInfoCallback::getAllTiles(FowTilesType & tiles, std::optional<PlayerCo
 	std::vector<int> floors;
 	if(level == -1)
 	{
-		for(int b = 0; b < gameState().getMap().levels(); ++b)
+		for(int b = 0; b < map().levels(); ++b)
 		{
 			floors.push_back(b);
 		}
@@ -886,9 +891,9 @@ void CGameInfoCallback::getAllTiles(FowTilesType & tiles, std::optional<PlayerCo
 
 	for(auto zd: floors)
 	{
-		for(int xd = 0; xd < gameState().getMap().width; xd++)
+		for(int xd = 0; xd < map().width; xd++)
 		{
-			for(int yd = 0; yd < gameState().getMap().height; yd++)
+			for(int yd = 0; yd < map().height; yd++)
 			{
 				int3 coordinates(xd, yd, zd);
 				if (filter(getTile(coordinates)))
@@ -900,7 +905,7 @@ void CGameInfoCallback::getAllTiles(FowTilesType & tiles, std::optional<PlayerCo
 
 void CGameInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::optional<ui16> level) const
 {
-	for (auto const & spellID : gameState().getMap().allowedSpells)
+	for (auto const & spellID : map().allowedSpells)
 	{
 		const auto * spell = spellID.toEntity(LIBRARY);
 
@@ -916,7 +921,7 @@ void CGameInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::option
 
 bool CGameInfoCallback::checkForVisitableDir(const int3 & src, const int3 & dst) const
 {
-	const CMap & map = gameState().getMap();
+	const CMap & map = this->map();
 	const TerrainTile * pom = &map.getTile(dst);
 	return map.checkForVisitableDir(src, pom, dst);
 }

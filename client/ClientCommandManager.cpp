@@ -235,6 +235,9 @@ void ClientCommandManager::handleTranslateMapsCommand()
 
 	std::vector<std::shared_ptr<CampaignState>> loadedCampaigns;
 
+	std::unique_ptr<CMap> dummyMap;
+	auto cb = std::make_unique<EditorCallback>(dummyMap.get());
+
 	printCommandMessage("Loading maps for export");
 	for (auto const & mapName : mapList)
 	{

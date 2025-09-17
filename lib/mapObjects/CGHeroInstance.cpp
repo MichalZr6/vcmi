@@ -397,7 +397,7 @@ void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer)
 		// hero starts with default spellbook presence status
 		if(!getArt(ArtifactPosition::SPELLBOOK) && getHeroType()->haveSpellBook)
 		{
-			auto artifact = cb->gameState().createArtifact(ArtifactID::SPELLBOOK);
+			auto artifact = cb->map().createArtifact(ArtifactID::SPELLBOOK, cb);
 			putArtifact(ArtifactPosition::SPELLBOOK, artifact);
 		}
 	}
@@ -406,7 +406,7 @@ void CGHeroInstance::initHero(IGameRandomizer & gameRandomizer)
 
 	if(!getArt(ArtifactPosition::MACH4))
 	{
-		auto artifact = cb->gameState().createArtifact(ArtifactID::CATAPULT);
+		auto artifact = cb->map().createArtifact(ArtifactID::CATAPULT, cb);
 		putArtifact(ArtifactPosition::MACH4, artifact); //everyone has a catapult
 	}
 
@@ -517,7 +517,7 @@ void CGHeroInstance::initArmy(vstd::RNG & rand, IArmyDescriptor * dst)
 
 				if(!getArt(slot))
 				{
-					auto artifact = cb->gameState().createArtifact(aid);
+					auto artifact = cb->map().createArtifact(aid, cb);
 					putArtifact(slot, artifact);
 				}
 				else
@@ -1697,13 +1697,7 @@ void CGHeroInstance::serializeCommonOptions(JsonSerializeFormat & handler)
 
 	if(handler.saving)
 	{
-		// FIXME: EditorCallback (used in map editor) has no access to GameState.
-		// serializeJsonArtifacts expects non-const CMap *
-		// Find some cleaner solution
-		if(auto * ecb = dynamic_cast<CMapBoundInfoCallback *>(cb))
-			CArtifactSet::serializeJsonArtifacts(handler, "artifacts", const_cast<CMap *>(ecb->getMapConstPtr()));
-		else
-			CArtifactSet::serializeJsonArtifacts(handler, "artifacts", &cb->gameState().getMap());
+		CArtifactSet::serializeJsonArtifacts(handler, "artifacts", &cb->map());
 	}
 }
 
