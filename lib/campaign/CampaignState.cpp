@@ -22,7 +22,6 @@
 #include "../serializer/JsonDeserializer.h"
 #include "../serializer/JsonSerializer.h"
 #include "../json/JsonUtils.h"
-#include "../lib/callback/MapInfoCallback.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 

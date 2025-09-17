@@ -9,11 +9,11 @@
  */
 #pragma once
 
-#include "../lib/callback/MapInfoCallback.h"
+#include "../lib/callback/IMapInfoCallback.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-class DLL_LINKAGE EditorCallback : public MapInfoCallback
+class DLL_LINKAGE EditorCallback : public IMapInfoCallback
 {
 
 public:

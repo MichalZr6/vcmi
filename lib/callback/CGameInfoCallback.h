@@ -9,14 +9,14 @@
  */
 #pragma once
 
-#include "MapInfoCallback.h"
+#include "IMapInfoCallback.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
 struct SThievesGuildInfo;
 class Player;
 
-class DLL_LINKAGE CGameInfoCallback : public MapInfoCallback
+class DLL_LINKAGE CGameInfoCallback : public IMapInfoCallback
 {
 protected:
 	const CMap * getMapConstPtr() const override;

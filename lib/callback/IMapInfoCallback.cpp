@@ -1,5 +1,5 @@
 /*
- * MapInfoCallback.cpp, part of VCMI engine
+ * IMapInfoCallback.cpp, part of VCMI engine
  *
  * Authors: listed in file AUTHORS in main folder
  *
@@ -8,7 +8,7 @@
  *
  */
 #include "StdInc.h"
-#include "MapInfoCallback.h"
+#include "IMapInfoCallback.h"
 #include "../constants/EntityIdentifiers.h"
 #include "../mapObjects/CGObjectInstance.h"
 #include "../mapObjects/CGHeroInstance.h"
@@ -20,9 +20,9 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-MapInfoCallback::~MapInfoCallback() = default;
+IMapInfoCallback::~IMapInfoCallback() = default;
 
-const CGObjectInstance * MapInfoCallback::getObj(ObjectInstanceID objid, bool verbose) const
+const CGObjectInstance * IMapInfoCallback::getObj(ObjectInstanceID objid, bool verbose) const
 {
 	if(!objid.hasValue())
 	{
@@ -41,19 +41,19 @@ const CGObjectInstance * MapInfoCallback::getObj(ObjectInstanceID objid, bool ve
 	return ret;
 }
 
-const CGHeroInstance * MapInfoCallback::getHero(ObjectInstanceID objid) const
+const CGHeroInstance * IMapInfoCallback::getHero(ObjectInstanceID objid) const
 {
 	const CGObjectInstance * obj = getObj(objid, false);
 	return dynamic_cast<const CGHeroInstance *>(obj);
 }
 
-const CGTownInstance * MapInfoCallback::getTown(ObjectInstanceID objid) const
+const CGTownInstance * IMapInfoCallback::getTown(ObjectInstanceID objid) const
 {
 	const CGObjectInstance * obj = getObj(objid, false);
 	return dynamic_cast<const CGTownInstance*>(obj);
 }
 
-PlayerColor MapInfoCallback::getOwner(ObjectInstanceID heroID) const
+PlayerColor IMapInfoCallback::getOwner(ObjectInstanceID heroID) const
 {
 	const CGObjectInstance * obj = getObj(heroID);
 	if(!obj)
@@ -65,42 +65,42 @@ PlayerColor MapInfoCallback::getOwner(ObjectInstanceID heroID) const
 	return obj->tempOwner;
 }
 
-const CArtifactInstance * MapInfoCallback::getArtInstance(ArtifactInstanceID aid) const
+const CArtifactInstance * IMapInfoCallback::getArtInstance(ArtifactInstanceID aid) const
 {
 	return getMapConstPtr()->getArtifactInstance(aid);
 }
 
-const CGObjectInstance * MapInfoCallback::getObjInstance(ObjectInstanceID oid) const
+const CGObjectInstance * IMapInfoCallback::getObjInstance(ObjectInstanceID oid) const
 {
 	return getMapConstPtr()->getObject((oid));
 }
 
-bool MapInfoCallback::isInTheMap(const int3 & pos) const
+bool IMapInfoCallback::isInTheMap(const int3 & pos) const
 {
 	return getMapConstPtr()->isInTheMap(pos);
 }
 
-bool MapInfoCallback::isAllowed(SpellID id) const
+bool IMapInfoCallback::isAllowed(SpellID id) const
 {
 	return getMapConstPtr()->allowedSpells.count(id) != 0;
 }
 
-bool MapInfoCallback::isAllowed(ArtifactID id) const
+bool IMapInfoCallback::isAllowed(ArtifactID id) const
 {
 	return getMapConstPtr()->allowedArtifact.count(id) != 0;
 }
 
-bool MapInfoCallback::isAllowed(SecondarySkill id) const
+bool IMapInfoCallback::isAllowed(SecondarySkill id) const
 {
 	return getMapConstPtr()->allowedAbilities.count(id) != 0;
 }
 
-int3 MapInfoCallback::getMapSize() const
+int3 IMapInfoCallback::getMapSize() const
 {
 	return int3(getMapConstPtr()->width, getMapConstPtr()->height, getMapConstPtr()->levels());
 }
 
-void MapInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::optional<ui16> level)
+void IMapInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::optional<ui16> level)
 {
 	for (auto const & spellID : getMapConstPtr()->allowedSpells)
 	{
@@ -116,12 +116,12 @@ void MapInfoCallback::getAllowedSpells(std::vector<SpellID> & out, std::optional
 	}
 }
 
-const IGameSettings & MapInfoCallback::getSettings() const
+const IGameSettings & IMapInfoCallback::getSettings() const
 {
 	return getMapConstPtr()->getSettings();
 }
 
-const CMapHeader * MapInfoCallback::getMapHeader() const
+const CMapHeader * IMapInfoCallback::getMapHeader() const
 {
 	return getMapConstPtr();
 }

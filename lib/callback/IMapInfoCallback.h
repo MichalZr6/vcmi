@@ -15,13 +15,13 @@ VCMI_LIB_NAMESPACE_BEGIN
 
 class CMap;
 
-class DLL_LINKAGE MapInfoCallback : public IGameInfoCallback
+class DLL_LINKAGE IMapInfoCallback : public IGameInfoCallback
 {
 protected:
 	virtual const CMap * getMapConstPtr() const = 0;
 
 public:
-	virtual ~MapInfoCallback();
+	virtual ~IMapInfoCallback();
 
 	const CGObjectInstance * getObj(ObjectInstanceID objid, bool verbose = true) const override;
 	const CGObjectInstance * getObjInstance(ObjectInstanceID oid) const override;

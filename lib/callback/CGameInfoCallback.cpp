@@ -113,7 +113,7 @@ TurnTimerInfo CGameInfoCallback::getPlayerTurnTime(PlayerColor color) const
 
 const CGObjectInstance* CGameInfoCallback::getObj(ObjectInstanceID objid, bool verbose) const
 {
-	const CGObjectInstance * ret = MapInfoCallback::getObj(objid, verbose);
+	const CGObjectInstance * ret = IMapInfoCallback::getObj(objid, verbose);
 
 	if(!ret)
 		return nullptr;
