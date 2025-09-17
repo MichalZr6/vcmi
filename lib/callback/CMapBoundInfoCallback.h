@@ -1,5 +1,5 @@
 /*
- * EditorCallback.h, part of VCMI engine
+ * CMapBoundInfoCallback.h, part of VCMI engine
  *
  * Authors: listed in file AUTHORS in main folder
  *
@@ -13,11 +13,11 @@
 
 VCMI_LIB_NAMESPACE_BEGIN
 
-class DLL_LINKAGE EditorCallback : public IMapInfoCallback
+class DLL_LINKAGE CMapBoundInfoCallback : public IMapInfoCallback
 {
 
 public:
-	explicit EditorCallback(const CMap * map);
+	explicit CMapBoundInfoCallback(const CMap * map);
 
 	void setMap(const CMap * map);
 	const CMap * getMapConstPtr() const override;
@@ -69,7 +69,7 @@ public:
 	EPlayerStatus getPlayerStatus(PlayerColor player, bool verbose) const override;
 	int getResource(PlayerColor player, GameResID which) const override;
 
-	virtual ~EditorCallback() = default;
+	virtual ~CMapBoundInfoCallback() = default;
 
 private:
 	const CMap * map;

@@ -52,7 +52,7 @@ MapController::MapController(MainWindow * m): main(m)
 		_miniscenes[i].reset(new MinimapScene(i));
 	}
 	connectScenes();
-	_cb = std::make_unique<EditorCallback>(nullptr);
+	_cb = std::make_unique<CMapBoundInfoCallback>(nullptr);
 }
 
 void MapController::connectScenes()
@@ -72,12 +72,12 @@ MapController::~MapController()
 	main = nullptr;
 }
 
-void MapController::setCallback(std::unique_ptr<EditorCallback> cb)
+void MapController::setCallback(std::unique_ptr<CMapBoundInfoCallback> cb)
 {
 	_cb = std::move(cb);
 }
 
-EditorCallback * MapController::getCallback()
+CMapBoundInfoCallback * MapController::getCallback()
 {
 	return _cb.get();
 }

@@ -44,7 +44,7 @@
 #include "../spells/CSpellHandler.h"
 #include "../texts/TextOperations.h"
 #include "entities/hero/CHeroClass.h"
-#include "../lib/callback/EditorCallback.h"
+#include "../lib/callback/CMapBoundInfoCallback.h"
 
 VCMI_LIB_NAMESPACE_BEGIN
 
@@ -68,7 +68,7 @@ std::unique_ptr<CMap> CMapLoaderH3M::loadMap()
 	// Init map object by parsing the input buffer
 	map = new CMap;
 	mapHeader = std::unique_ptr<CMapHeader>(dynamic_cast<CMapHeader *>(map));
-	auto mapInfoCallback = dynamic_cast<EditorCallback *>(cb);
+	auto mapInfoCallback = dynamic_cast<CMapBoundInfoCallback *>(cb);
 	if(mapInfoCallback)
 		mapInfoCallback->setMap(map);
 

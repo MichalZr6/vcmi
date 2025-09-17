@@ -86,7 +86,7 @@ set(lib_MAIN_SRCS
 	callback/CPlayerSpecificInfoCallback.cpp
 	callback/GameRandomizer.cpp
 	callback/IMapInfoCallback.cpp
-	callback/EditorCallback.cpp
+	callback/CMapBoundInfoCallback.cpp
 
 	campaign/CampaignBonus.cpp
 	campaign/CampaignHandler.cpp
@@ -500,7 +500,7 @@ set(lib_MAIN_HEADERS
 	callback/IGameRandomizer.h
 	callback/GameRandomizer.h
 	callback/IMapInfoCallback.h
-	callback/EditorCallback.h
+	callback/CMapBoundInfoCallback.h
 	
 	campaign/CampaignBonus.h
 	campaign/CampaignConstants.h

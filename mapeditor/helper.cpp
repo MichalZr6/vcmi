@@ -108,7 +108,7 @@ void Helper::saveCampaign(std::shared_ptr<CampaignState> campaignState, const QS
 	auto saver = std::make_shared<CZipSaver>(io, filename.toStdString());
 	for(auto & scenario : campaignState->allScenarios())
 	{
-		EditorCallback cb(nullptr);
+		CMapBoundInfoCallback cb(nullptr);
 		CMapService mapService;
 		mapService.setCallback(&cb);
 		auto map = campaignState->getMap(scenario, &mapService);

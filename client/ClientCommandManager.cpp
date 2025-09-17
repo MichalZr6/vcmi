@@ -23,6 +23,7 @@
 #include "../lib/callback/CCallback.h"
 #include "../lib/callback/CGlobalAI.h"
 #include "../lib/callback/CDynLibHandler.h"
+#include "../lib/callback/CMapBoundInfoCallback.h"
 #include "../lib/CConfigHandler.h"
 #include "../lib/gameState/CGameState.h"
 #include "../lib/CPlayerState.h"
@@ -223,7 +224,7 @@ void ClientCommandManager::handleTranslateGameCommand(bool onlyMissing)
 void ClientCommandManager::handleTranslateMapsCommand()
 {
 	CMapService mapService;
-	EditorCallback cb(nullptr);
+	CMapBoundInfoCallback cb(nullptr);
 	mapService.setCallback(&cb);
 
 	printCommandMessage("Searching for available maps");

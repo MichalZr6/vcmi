@@ -34,7 +34,7 @@
 #include "../../lib/mapping/MapFormat.h"
 #include "../../lib/TerrainHandler.h"
 #include "../../lib/filesystem/Filesystem.h"
-#include "../../lib/callback/EditorCallback.h"
+#include "../../lib/callback/CMapBoundInfoCallback.h"
 #include "../../lib/StartInfo.h"
 #include "../../lib/mapObjects/CGHeroInstance.h"
 #include "../../lib/rmg/CMapGenOptions.h"
@@ -102,7 +102,7 @@ std::vector<std::shared_ptr<CanvasImage>> CMapOverviewWidget::createMinimaps(con
 	std::vector<std::shared_ptr<CanvasImage>> ret;
 
 	CMapService mapService;
-	EditorCallback cb(nullptr);
+	CMapBoundInfoCallback cb(nullptr);
 	mapService.setCallback(&cb);
 	std::unique_ptr<CMap> map;
 	try
@@ -172,7 +172,7 @@ CMapOverviewWidget::CMapOverviewWidget(CMapOverview& parent):
 			if(startInfo.campState)
 			{
 				CMapService mapService;
-				EditorCallback cb(nullptr);
+				CMapBoundInfoCallback cb(nullptr);
 				mapService.setCallback(&cb);
 				campaignMap = startInfo.campState->getMap(*startInfo.campState->currentScenario(), &mapService);
 			}
